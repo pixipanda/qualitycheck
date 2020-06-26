@@ -12,9 +12,9 @@ This project implemented using Spark
 Config file template
 ---------------------------------
 ```text
-src/main/resources/application.conf
+src/test/resources/application.conf
 Create a config file for each job in your project and put appropriate checks.
-dataQualityCheck parameter is an array. So you can have data quality checks for multiple tables.
+sources config parameter is an array. So you can have data quality checks for multiple tables.
 ```
 ```hocon
 qualityCheck {
