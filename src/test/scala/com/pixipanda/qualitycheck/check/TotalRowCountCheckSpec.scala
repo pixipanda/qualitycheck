@@ -2,7 +2,7 @@
 package com.pixipanda.qualitycheck.check
 
 import cats.syntax.either._
-import com.lowes.TestingSparkSession
+import com.pixipanda.qualitycheck.TestingSparkSession
 import com.pixipanda.qualitycheck.QualityCheckConfig
 import com.pixipanda.qualitycheck.TestHelpers._
 import com.pixipanda.qualitycheck.check.RowCountCheck.totalRowCountDecoder

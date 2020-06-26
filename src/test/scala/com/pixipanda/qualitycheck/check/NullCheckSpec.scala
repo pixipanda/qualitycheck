@@ -1,8 +1,7 @@
 package com.pixipanda.qualitycheck.check
 
 import cats.syntax.either._
-import com.lowes.TestingSparkSession
-import com.pixipanda.qualitycheck.QualityCheckConfig
+import com.pixipanda.qualitycheck.{QualityCheckConfig, TestingSparkSession}
 import com.pixipanda.qualitycheck.TestHelpers._
 import com.pixipanda.qualitycheck.constant.Checks.NULLCHECK
 import com.pixipanda.qualitycheck.source.Hive

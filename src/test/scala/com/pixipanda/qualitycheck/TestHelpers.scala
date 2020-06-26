@@ -1,6 +1,5 @@
 package com.pixipanda.qualitycheck
 
-import com.lowes.TestingSparkSession
 import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.scalatest.FunSpec

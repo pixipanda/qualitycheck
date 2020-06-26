@@ -127,7 +127,7 @@ checks:
 Class Name
 -------------------------------
 ```scala
-com.lowes.qualitycheck.jobs.QualityCheck
+com.pixipanda.qualitycheck.jobs.QualityCheck
 ```
 
 

@@ -1,8 +1,7 @@
 package com.pixipanda.qualitycheck.config
 
-import com.lowes.TestingSparkSession
 import com.pixipanda.qualitycheck.constant.Checks._
-import com.pixipanda.qualitycheck.QualityCheckConfig
+import com.pixipanda.qualitycheck.{QualityCheckConfig, TestingSparkSession}
 import com.pixipanda.qualitycheck.check.{DistinctCheck, DistinctRelation, NullCheck, RowCountCheck, UniqueCheck}
 import com.pixipanda.qualitycheck.source.{Hive, Teradata}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
