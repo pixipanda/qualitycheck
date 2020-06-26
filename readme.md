@@ -138,7 +138,7 @@ How to run this program
 -------------------------------
 ```text
 Local: Run this test case to get a demo of the framework.
-src/test/scala/com/pixipanda/qualitycheck/utils/ComputeChecksSpec.scala
+src/test/scala/com/pixipanda/qualitycheck/report/ReportBuilderSpec.scala
 Custer:
 Please do create a shell script to submit spark job in your project and possibly include that as an action in your workflow.xml
 ```

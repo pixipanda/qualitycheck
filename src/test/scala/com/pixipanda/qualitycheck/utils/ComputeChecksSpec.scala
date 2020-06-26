@@ -1,10 +1,8 @@
 package com.pixipanda.qualitycheck.utils
 
-import com.pixipanda.qualitycheck.QualityCheckConfig
+import com.pixipanda.qualitycheck.TestConfig
 import com.pixipanda.qualitycheck.check._
 import com.pixipanda.qualitycheck.constant.Checks._
-import com.pixipanda.qualitycheck.report.ReportBuilder
-import com.pixipanda.qualitycheck.source.{DataFrameTestFailure, DataFrameTestSuccess}
 import com.pixipanda.qualitycheck.stat.checkstat._
 import com.pixipanda.qualitycheck.stat.sourcestat.SourceStat
 import com.pixipanda.qualitycheck.validator.SourceValidator
@@ -16,47 +14,8 @@ class ComputeChecksSpec extends FunSpec {
 
     describe("Functionality") {
 
-      val successConfig = QualityCheckConfig(
-        List(
-          DataFrameTestSuccess(
-            "testSpark",
-            "testDb",
-            "testTable",
-            null,
-            List(
-              RowCountCheck(0, "gt", ROWCOUNTCHECK),
-              NullCheck(List("quantity"), NULLCHECK),
-              DistinctCheck(List(DistinctRelation(List("item"), 2, "ge")), DISTINCTCHECK),
-              UniqueCheck(List(List("item"), List("price"), List("quantity")), UNIQUECHECK)
-            )
-          )
-        )
-      )
-
-
-      val failureConfig = QualityCheckConfig(
-        List(
-          DataFrameTestFailure(
-            "testSpark",
-            "testDb",
-            "testTable",
-            "testquery",
-            List(
-              RowCountCheck(0, "gt", ROWCOUNTCHECK),
-              NullCheck(List("quantity"), NULLCHECK),
-              DistinctCheck(List(DistinctRelation(List("item"), 2, "ge")), DISTINCTCHECK),
-              UniqueCheck(List(List("item"), List("price"), List("quantity")), UNIQUECHECK)
-            )
-          )
-        )
-      )
-
       val exists = true
 
-   /*   val totalRowCountStatMap = Map(RowCountCheck(0, "gt", TOTALROWCOUTNCHECK) -> 4L)
-      val totalRowCountStat = RowCountStat(totalRowCountStatMap)
-
-*/
       val rowCountStatMap = Map(RowCountCheck(0, "gt", ROWCOUNTCHECK) -> 4L)
       val rowCountStat = RowCountStat(rowCountStatMap)
 
@@ -83,7 +42,7 @@ class ComputeChecksSpec extends FunSpec {
       it("checkStats success") {
         val isSuccess = true
         val expectedResult = Result(stats, isSuccess)
-        val sources = successConfig.sources
+        val sources = TestConfig.successConfig.sources
         val sourceValidators = SourceValidator(sources)
 
         sources.indices.foreach(sourceIndex => {
@@ -104,7 +63,7 @@ class ComputeChecksSpec extends FunSpec {
         val nullStat = NullStat(nullStatMap)
         val expectedResult = Result[CheckStat](List(rowCountStat, nullStat), isSuccess)
 
-        val sources = failureConfig.sources
+        val sources = TestConfig.failureConfig.sources
         val sourceValidators = SourceValidator(sources)
 
         sources.indices.foreach(sourceIndex => {
@@ -127,25 +86,9 @@ class ComputeChecksSpec extends FunSpec {
       val expectedResult = Result(List(sourceStat), isSuccess)
 
       it("sourceStats success") {
-        val sut = ComputeChecks.runChecks(successConfig)
+        val sut = ComputeChecks.runChecks(TestConfig.successConfig)
         assert(sut == expectedResult)
       }
-
-      it("Success Report") {
-        val isSuccess = true
-        val result = ComputeChecks.runChecks(successConfig)
-        val report = ReportBuilder.buildReport(result.stats)
-        report.show(false)
-      }
-
-      it("Failure Report") {
-        val isSuccess = false
-        val result = ComputeChecks.runChecks(failureConfig)
-        val report = ReportBuilder.buildReport(result.stats)
-        report.show(false)
-      }
-
-
     }
   }
 }
