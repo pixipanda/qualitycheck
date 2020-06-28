@@ -1,10 +1,12 @@
 Quality Check 
 =====================================
 ```text
-This Project is used for data validation checks.
-Every job must do data quality checks of their data.
-Every job must define a config file for its data quality check
-This project implemented using Spark
+This project is implemented using spark, circe json, cats frameworks
+1. This framework could be used to do data quality checks on different data sources. As of now, only Hive is supported but could be extended to any data source.
+2. Supported checks: row count check, null check, unique check, distinct check. It could be extended to include other checks
+3. After the checks, it builds a dataFrame report. This dataFrame could be used to compare data correctness among multiple data sources
+4. Reports could be exported as json or csv or as a dataFrame.
+
 ```
 
 
