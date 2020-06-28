@@ -161,3 +161,45 @@ Please do create a shell script to submit spark job in your project and possibly
 </action>
 ```
 
+
+
+Output
+------------------------------
+success report on the source data
+```text
++----------------+------------+--------+--------+-----------+------+----------+----------+
+|label           |statName    |columns |relation|configValue|actual|validation|jobRunDate|
++----------------+------------+--------+--------+-----------+------+----------+----------+
+|testDb_testTable|rowCountStat|NA      |gt      |0          |4     |success   |2020-06-28|
+|testDb_testTable|nullStat    |quantity|eq      |0          |0     |success   |2020-06-28|
+|testDb_testTable|distinctStat|item    |ge      |2          |4     |success   |2020-06-28|
+|testDb_testTable|uniqueStat  |price   |eq      |0          |0     |success   |2020-06-28|
+|testDb_testTable|uniqueStat  |quantity|eq      |0          |0     |success   |2020-06-28|
+|testDb_testTable|uniqueStat  |item    |eq      |0          |0     |success   |2020-06-28|
++----------------+------------+--------+--------+-----------+------+----------+----------+
+
+"actual" column contains computed values for all the checks for all the sources(data stores)
+This column could be used to compare multiple sources(data stores)
+
+
+
+Failure report on the query data
+Here nullCheck failed
++----------------------+------------+--------+--------+-----------+------+----------+----------+
+|label                 |statName    |columns |relation|configValue|actual|validation|jobRunDate|
++----------------------+------------+--------+--------+-----------+------+----------+----------+
+|testDb_testTable_query|rowCountStat|NA      |gt      |0          |4     |success   |2020-06-28|
+|testDb_testTable_query|nullStat    |quantity|eq      |0          |1     |failed    |2020-06-28|
++----------------------+------------+--------+--------+-----------+------+----------+----------+
+
+```
+
+
+Api to get the stats
+------------------------------
+```txt
+Pass the typesafe parsed config object of your config file
+com.pixipanda.qualitycheck.api.StatApi.getStats(config)
+```
+
+
