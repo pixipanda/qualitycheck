@@ -205,3 +205,9 @@ com.pixipanda.qualitycheck.api.StatApi.getStats(config)
 ```
 
 
+Limitation
+------------------------------
+```text
+Current, Spark fetches data from different data stores and then performs all the checks. This has a overhead of transfering data from different stores to Spark.
+In future, dynamic predicate push will be supported so that data will be transferred only if necessary otherwise stats computation will be pushed to the data store.
+```

@@ -1,6 +1,12 @@
 .idea
 ./idea
+idea
+.target
+./target
 target
-build-files
+.metastore_db
+./metastore_db
 metastore_db
+.derby.log
+./derby.log
 derby.log
