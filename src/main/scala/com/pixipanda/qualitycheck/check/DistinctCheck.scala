@@ -1,7 +1,9 @@
 package com.pixipanda.qualitycheck.check
 
 import cats.syntax.either._
+import com.pixipanda.qualitycheck.constant.Checks.DISTINCTCHECK
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, DistinctStat}
+import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder.Result
 import io.circe._
@@ -9,6 +11,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
 
 import scala.collection.mutable
+import scala.collection.JavaConverters._
 
 case class DistinctRelation(columns: Seq[String], count:Int, relation: String)
 
@@ -51,5 +54,20 @@ object DistinctRelation extends LazyLogging {
       }yield DistinctRelation(columns, count, relation)
     }
   }
+
+  def parse(config: Config): DistinctRelation = {
+    val columns = config.getStringList("columns").asScala.toList
+    val count = config.getInt("count")
+    val relation = config.getString("relation")
+    DistinctRelation(columns,count, relation)
+  }
 }
 
+
+object DistinctCheck {
+
+  def parse(config: Config): DistinctCheck = {
+    val distinctRelations = config.getConfigList("distinctChecks").asScala.toList.map(DistinctRelation.parse)
+    DistinctCheck(distinctRelations, DISTINCTCHECK)
+  }
+}

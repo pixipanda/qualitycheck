@@ -33,7 +33,7 @@ object ComputeChecks extends LazyLogging{
           }
         }
         else {
-          logger.error(s"Source ${source.getLabel} does not exist")
+          logger.error(s"DataStores ${source.getLabel} does not exist")
           throw AllDone
         }
       })

@@ -3,6 +3,7 @@ package com.pixipanda.qualitycheck.check
 import cats.syntax.either._
 import com.pixipanda.qualitycheck.constant.Checks.NULLCHECK
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, NullStat}
+import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder.Result
 import io.circe._
@@ -10,6 +11,7 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 
 import scala.collection.mutable
+import scala.collection.JavaConverters._
 
 case class NullCheck(columns: Seq[String], override val checkType: String) extends Check(checkType) {
 
@@ -42,5 +44,10 @@ object NullCheck extends  LazyLogging {
         columns <- c.downField("nullCheck").as[Seq[String]]
       }yield NullCheck(columns, NULLCHECK)
     }
+  }
+
+  def parse(config: Config): NullCheck = {
+    val columns = config.getStringList("nullCheck").asScala.toList
+    NullCheck(columns, NULLCHECK)
   }
 }

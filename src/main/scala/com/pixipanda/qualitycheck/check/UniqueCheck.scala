@@ -1,14 +1,18 @@
 package com.pixipanda.qualitycheck.check
 
+import java.util
+
 import cats.syntax.either._
 import com.pixipanda.qualitycheck.constant.Checks.UNIQUECHECK
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, UniqueStat}
+import com.typesafe.config.Config
 import io.circe.Decoder.Result
 import io.circe._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
 
 import scala.collection.mutable
+import scala.collection.JavaConverters._
 
 case class UniqueCheck(uniqueChecks: Seq[Seq[String]], override val checkType: String) extends  Check(checkType){
 
@@ -47,5 +51,13 @@ object UniqueCheck {
         uniqueChecks <- c.downField("uniqueChecks").as[Seq[Seq[String]]]
       } yield UniqueCheck(uniqueChecks, UNIQUECHECK)
     }
+  }
+
+  def parse(config: Config): UniqueCheck = {
+    val uniqueChecks: Seq[Seq[String]] = config.getList("uniqueChecks")
+      .unwrapped
+      .asScala.toList
+      .map(_.asInstanceOf[util.ArrayList[String]].asScala.toList)
+    UniqueCheck(uniqueChecks, UNIQUECHECK)
   }
 }

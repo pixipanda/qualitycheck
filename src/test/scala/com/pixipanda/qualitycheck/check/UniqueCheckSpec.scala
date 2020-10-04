@@ -1,13 +1,11 @@
 package com.pixipanda.qualitycheck.check
 
-import cats.syntax.either._
 import com.pixipanda.qualitycheck.{QualityCheckConfig, TestingSparkSession}
 import com.pixipanda.qualitycheck.TestHelpers.mkDF
 import com.pixipanda.qualitycheck.constant.Checks.UNIQUECHECK
 import com.pixipanda.qualitycheck.source.table.Hive
 import com.pixipanda.qualitycheck.stat.checkstat.UniqueStat
-import io.circe.{Json, parser}
-import io.circe.config.{parser => configParser}
+import com.typesafe.config.ConfigFactory
 import org.scalatest.FunSpec
 
 
@@ -27,9 +25,9 @@ class UniqueCheckSpec extends FunSpec with TestingSparkSession{
             |]
           """.stripMargin
 
-        val uniqueCheckJson = configParser.parse(uniqueCheckString).getOrElse(Json.Null)
-        val sut = parser.decode[UniqueCheck](uniqueCheckJson.toString)
-        assert(sut ==  Right(UniqueCheck(List(List("item"), List("price"), List("quantity")), UNIQUECHECK)))
+        val config = ConfigFactory.parseString(uniqueCheckString)
+        val sut = UniqueCheck.parse(config)
+        assert(sut ==  UniqueCheck(List(List("item"), List("price"), List("quantity")), UNIQUECHECK))
       }
     }
 
