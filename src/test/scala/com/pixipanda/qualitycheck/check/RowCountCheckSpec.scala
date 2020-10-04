@@ -1,13 +1,11 @@
 package com.pixipanda.qualitycheck.check
 
-import cats.syntax.either._
 import com.pixipanda.qualitycheck.{QualityCheckConfig, TestingSparkSession}
 import com.pixipanda.qualitycheck.TestHelpers._
 import com.pixipanda.qualitycheck.constant.Checks.ROWCOUNTCHECK
 import com.pixipanda.qualitycheck.source.table.Hive
 import com.pixipanda.qualitycheck.stat.checkstat.RowCountStat
-import io.circe.config.{parser => configParser}
-import io.circe.{Json, parser}
+import com.typesafe.config.ConfigFactory
 import org.scalatest.FunSpec
 
 class RowCountCheckSpec extends FunSpec with TestingSparkSession{
@@ -25,10 +23,9 @@ class RowCountCheckSpec extends FunSpec with TestingSparkSession{
             | }
           """.stripMargin
 
-        val doc = configParser.parse(rowCountCheckString).getOrElse(Json.Null)
-        val rowCountCheckJson = doc.hcursor.downField("rowCountCheck").focus.get
-        val sut = parser.decode[RowCountCheck](rowCountCheckJson.toString)
-        assert(sut ==  Right(RowCountCheck(0, "gt", ROWCOUNTCHECK)))
+        val config = ConfigFactory.parseString(rowCountCheckString)
+        val sut = RowCountCheck.parse(config)
+        assert(sut ==  RowCountCheck(0, "gt", ROWCOUNTCHECK))
       }
     }
 

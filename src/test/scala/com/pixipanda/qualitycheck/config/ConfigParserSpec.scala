@@ -99,8 +99,8 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
           |  ]
           |}
         """.stripMargin
-      val testQualityCheckConfig = ConfigParser.parseConfig(configString)
-      assert(testQualityCheckConfig == Right(expectedHiveConfig))
+      val testQualityCheckConfig = ConfigParser.parseString(configString)
+      assert(testQualityCheckConfig == expectedHiveConfig)
     }
 
 
@@ -139,8 +139,8 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
           |}
         """.stripMargin
 
-      val testQualityCheckConfig = ConfigParser.parseConfig(noQueryConfigString)
-      assert(testQualityCheckConfig == Right(expectedNoQueryTeraDataConfig))
+      val testQualityCheckConfig = ConfigParser.parseString(noQueryConfigString)
+      assert(testQualityCheckConfig == expectedNoQueryTeraDataConfig)
     }
 
 

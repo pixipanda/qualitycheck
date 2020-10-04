@@ -1,13 +1,11 @@
 package com.pixipanda.qualitycheck.check
 
-import cats.syntax.either._
 import com.pixipanda.qualitycheck.{QualityCheckConfig, TestingSparkSession}
 import com.pixipanda.qualitycheck.TestHelpers._
 import com.pixipanda.qualitycheck.constant.Checks.NULLCHECK
 import com.pixipanda.qualitycheck.source.table.Hive
 import com.pixipanda.qualitycheck.stat.checkstat.NullStat
-import io.circe.{Json, parser}
-import io.circe.config.{parser => configParser}
+import com.typesafe.config.ConfigFactory
 import org.scalatest.FunSpec
 
 class NullCheckSpec extends FunSpec with TestingSparkSession{
@@ -19,9 +17,9 @@ class NullCheckSpec extends FunSpec with TestingSparkSession{
           """
             | nullCheck = ["quantity"]
           """.stripMargin
-        val nullCheckJson = configParser.parse(nullCheckString).getOrElse(Json.Null)
-        val sut = parser.decode[NullCheck](nullCheckJson.toString)
-        assert(sut ==  Right(NullCheck(List("quantity"), NULLCHECK)))
+        val config = ConfigFactory.parseString(nullCheckString)
+        val sut = NullCheck.parse(config)
+        assert(sut ==  NullCheck(List("quantity"), NULLCHECK))
       }
     }
 

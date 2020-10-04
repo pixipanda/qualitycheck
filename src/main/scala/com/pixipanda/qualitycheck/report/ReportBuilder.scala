@@ -2,7 +2,7 @@ package com.pixipanda.qualitycheck.report
 
 import com.pixipanda.qualitycheck.Spark
 import com.pixipanda.qualitycheck.stat.sourcestat.SourceStat
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions._
 
 import scala.collection.mutable.ListBuffer
@@ -29,5 +29,11 @@ object ReportBuilder extends Spark{
       .withColumn("jobRunDate", current_date())
 
     qualityStatReport
+  }
+
+
+  def saveReport(df: DataFrame, path: String): Unit = {
+    df.show(false)
+    df.coalesce(1).write.mode(SaveMode.Overwrite).csv(path)
   }
 }

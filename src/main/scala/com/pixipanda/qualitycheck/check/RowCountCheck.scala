@@ -3,6 +3,7 @@ package com.pixipanda.qualitycheck.check
 import cats.syntax.either._
 import com.pixipanda.qualitycheck.constant.Checks._
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, RowCountStat}
+import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.DataFrame
 import io.circe.Decoder.Result
@@ -30,5 +31,12 @@ object  RowCountCheck extends  LazyLogging {
         relation <- c.downField("relation").as[String]
       }yield RowCountCheck(count, relation, ROWCOUNTCHECK)
     }
+  }
+
+  def parse(config: Config): RowCountCheck = {
+    val rowCountConfig = config.getConfig("rowCountCheck")
+    val count = rowCountConfig.getInt("count")
+    val relation = rowCountConfig.getString("relation")
+    RowCountCheck(count, relation, ROWCOUNTCHECK)
   }
 }

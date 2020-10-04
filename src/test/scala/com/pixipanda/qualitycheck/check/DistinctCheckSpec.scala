@@ -1,13 +1,11 @@
 package com.pixipanda.qualitycheck.check
 
-import cats.syntax.either._
 import com.pixipanda.qualitycheck.{QualityCheckConfig, TestingSparkSession}
 import com.pixipanda.qualitycheck.TestHelpers._
 import com.pixipanda.qualitycheck.constant.Checks.DISTINCTCHECK
 import com.pixipanda.qualitycheck.source.table.Hive
 import com.pixipanda.qualitycheck.stat.checkstat.DistinctStat
-import io.circe.{Json, parser}
-import io.circe.config.{parser => configParser}
+import com.typesafe.config.ConfigFactory
 import org.scalatest.FunSpec
 
 class DistinctCheckSpec extends FunSpec with TestingSparkSession{
@@ -28,10 +26,9 @@ class DistinctCheckSpec extends FunSpec with TestingSparkSession{
         val drItem = DistinctRelation(List("item"), 2, "ge")
         val drPrice = DistinctRelation(List("price"), 1, "ge")
         val drQuantity = DistinctRelation(List("quantity"), 1, "ge")
-        val doc = configParser.parse(distinctCheckString).getOrElse(Json.Null)
-        val distinctCheckJson = doc.hcursor.downField("distinctChecks").focus.get
-        val sut = parser.decode[List[DistinctRelation]](distinctCheckJson.toString)
-        assert(sut ==  Right(List(drItem, drPrice,drQuantity)))
+        val config = ConfigFactory.parseString(distinctCheckString)
+        val sut = DistinctCheck.parse(config)
+        assert(sut ==  DistinctCheck(List(drItem, drPrice, drQuantity), DISTINCTCHECK))
       }
     }
 
