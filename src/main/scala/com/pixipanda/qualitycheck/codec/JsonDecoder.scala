@@ -5,7 +5,8 @@ import com.pixipanda.qualitycheck.constant.Checks._
 import com.pixipanda.qualitycheck.check._
 import com.pixipanda.qualitycheck.check.RowCountCheck._
 import com.pixipanda.qualitycheck.constant.Source._
-import com.pixipanda.qualitycheck.source.{Source, Hive, Teradata}
+import com.pixipanda.qualitycheck.source.Source
+import com.pixipanda.qualitycheck.source.table.{Hive, Teradata}
 import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder.Result
 import io.circe._

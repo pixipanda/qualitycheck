@@ -1,15 +1,16 @@
-package com.pixipanda.qualitycheck.source
+package com.pixipanda.qualitycheck.source.test
 
 import com.pixipanda.qualitycheck.check.Check
+import com.pixipanda.qualitycheck.source.table.Table
+import org.apache.spark.sql.types._
 import org.apache.spark.sql.{DataFrame, Row}
-import org.apache.spark.sql.types.{BooleanType, DataType, DoubleType, IntegerType, LongType, ShortType, StringType, StructField, StructType}
 
 abstract class DataFrameTest(
   sourceType: String,
   dbName: String,
   tableName: String,
   query: String,
-  checks: Seq[Check]) extends Source(sourceType, query){
+  checks: Seq[Check]) extends Table(sourceType, query){
 
   val data: Map[String, List[Any]] = Map(
     "item"     -> List("Eggs", "Milk", "Bread", "Cheese"),
@@ -19,21 +20,27 @@ abstract class DataFrameTest(
 
   override  def getChecks: Seq[Check] = checks
 
-  override def getQueryDF:DataFrame = mkDF(data.toSeq: _*)
+  def getDb: String = dbName
+
+  def getTable: String = tableName
+
+  def getQuery:String = query
 
   override def getDF:DataFrame = mkDF(data.toSeq: _*)
 
   override def getSourceType: String = sourceType
 
   override def exists: Boolean = {
-      true
+    true
   }
 
-  override def getLabel: String =
-    if(null != query)
-      s"${dbName}_${tableName}_query"
+  override def getLabel: String = {
+    val common = s"$sourceType:$dbName:$tableName"
+    if (null != query)
+      s"$common:$query"
     else
-      s"${dbName}_$tableName"
+      s"$common"
+  }
 
 
   def guessType(v: Any): DataType = v.getClass.getCanonicalName match {

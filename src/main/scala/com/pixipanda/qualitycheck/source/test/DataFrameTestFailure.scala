@@ -1,8 +1,8 @@
-package com.pixipanda.qualitycheck.source
+package com.pixipanda.qualitycheck.source.test
 
 import com.pixipanda.qualitycheck.check.Check
 
-case class DataFrameTestFailure(
+final case class DataFrameTestFailure(
   sourceType: String,
   dbName: String,
   tableName: String,

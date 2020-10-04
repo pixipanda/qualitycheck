@@ -4,7 +4,7 @@ import cats.syntax.either._
 import com.pixipanda.qualitycheck.{QualityCheckConfig, TestingSparkSession}
 import com.pixipanda.qualitycheck.TestHelpers._
 import com.pixipanda.qualitycheck.constant.Checks.DISTINCTCHECK
-import com.pixipanda.qualitycheck.source.Hive
+import com.pixipanda.qualitycheck.source.table.Hive
 import com.pixipanda.qualitycheck.stat.checkstat.DistinctStat
 import io.circe.{Json, parser}
 import io.circe.config.{parser => configParser}

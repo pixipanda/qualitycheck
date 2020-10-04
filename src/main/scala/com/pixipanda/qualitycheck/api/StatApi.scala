@@ -2,9 +2,9 @@ package com.pixipanda.qualitycheck.api
 
 import cats.syntax.either._
 import com.pixipanda.qualitycheck.QualityCheckConfig
+import com.pixipanda.qualitycheck.compute.ComputeChecks
 import com.pixipanda.qualitycheck.config.ConfigParser
 import com.pixipanda.qualitycheck.report.ReportBuilder
-import com.pixipanda.qualitycheck.utils.ComputeChecks
 import com.typesafe.config.Config
 import io.circe._
 import org.apache.spark.sql.DataFrame
@@ -13,7 +13,7 @@ object StatApi {
 
 
   private def buildStats(qualityCheckConfig: QualityCheckConfig):DataFrame = {
-    val result = ComputeChecks.runChecks(qualityCheckConfig)
+    val result = ComputeChecks.runChecks(qualityCheckConfig.sources)
     val sourceStat = result.stats
     ReportBuilder.buildReport(sourceStat)
 
