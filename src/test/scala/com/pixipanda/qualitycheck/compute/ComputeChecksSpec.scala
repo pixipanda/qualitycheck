@@ -1,11 +1,10 @@
-package com.pixipanda.qualitycheck.utils
+package com.pixipanda.qualitycheck.compute
 
 import com.pixipanda.qualitycheck.TestConfig
 import com.pixipanda.qualitycheck.check._
 import com.pixipanda.qualitycheck.constant.Checks._
 import com.pixipanda.qualitycheck.stat.checkstat._
 import com.pixipanda.qualitycheck.stat.sourcestat.SourceStat
-import com.pixipanda.qualitycheck.validator.SourceValidator
 import org.scalatest.FunSpec
 
 class ComputeChecksSpec extends FunSpec {
@@ -43,13 +42,9 @@ class ComputeChecksSpec extends FunSpec {
         val isSuccess = true
         val expectedResult = Result(stats, isSuccess)
         val sources = TestConfig.successConfig.sources
-        val sourceValidators = SourceValidator(sources)
 
-        sources.indices.foreach(sourceIndex => {
-          val source = sources(sourceIndex)
-          val sourceValidator = sourceValidators(sourceIndex)
-          val sut = ComputeChecks.runChecks(source, sourceValidator)
-
+        sources.foreach(source => {
+          val sut = ComputeChecks.runChecks(source)
           assert(sut == expectedResult)
           sut.stats.foreach(stat => {
             assert(stat.isSuccess)
@@ -64,13 +59,9 @@ class ComputeChecksSpec extends FunSpec {
         val expectedResult = Result[CheckStat](List(rowCountStat, nullStat), isSuccess)
 
         val sources = TestConfig.failureConfig.sources
-        val sourceValidators = SourceValidator(sources)
 
-        sources.indices.foreach(sourceIndex => {
-          val source = sources(sourceIndex)
-          val sourceValidator = sourceValidators(sourceIndex)
-          val sut = ComputeChecks.runChecks(source, sourceValidator)
-
+        sources.foreach(source => {
+          val sut = ComputeChecks.runChecks(source)
           assert(sut == expectedResult)
           val lastStat = sut.stats.last
           assert(!lastStat.isSuccess)
@@ -82,11 +73,11 @@ class ComputeChecksSpec extends FunSpec {
       }
 
       val isSuccess = true
-      val sourceStat = SourceStat(exists, "testDb_testTable", isSuccess, stats)
+      val sourceStat = SourceStat(exists, "testSpark:testDb:testTable", isSuccess, stats)
       val expectedResult = Result(List(sourceStat), isSuccess)
 
       it("sourceStats success") {
-        val sut = ComputeChecks.runChecks(TestConfig.successConfig)
+        val sut = ComputeChecks.runChecks(TestConfig.successConfig.sources)
         assert(sut == expectedResult)
       }
     }

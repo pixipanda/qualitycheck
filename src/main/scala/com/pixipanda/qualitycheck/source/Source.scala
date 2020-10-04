@@ -6,16 +6,11 @@ import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.DataFrame
 
 
-abstract class Source(
-  sourceType: String,
-  query: String
-) extends  Spark with LazyLogging {
+abstract class Source(sourceType: String) extends  Spark {
 
   def getChecks: Seq[Check]
 
   def getDF:DataFrame
-
-  def getQueryDF:DataFrame
 
   def getSourceType: String
 

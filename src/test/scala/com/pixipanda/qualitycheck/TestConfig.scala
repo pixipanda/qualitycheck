@@ -2,7 +2,7 @@ package com.pixipanda.qualitycheck
 
 import com.pixipanda.qualitycheck.check._
 import com.pixipanda.qualitycheck.constant.Checks.{DISTINCTCHECK, NULLCHECK, ROWCOUNTCHECK, UNIQUECHECK}
-import com.pixipanda.qualitycheck.source.{DataFrameTestFailure, DataFrameTestSuccess}
+import com.pixipanda.qualitycheck.source.test.{DataFrameTestFailure, DataFrameTestSuccess}
 
 object TestConfig {
 

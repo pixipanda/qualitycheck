@@ -1,8 +1,7 @@
 package com.pixipanda.qualitycheck.jobs
 
 
-import com.pixipanda.qualitycheck.Spark
-import com.pixipanda.qualitycheck.utils.ComputeChecks
+import com.pixipanda.qualitycheck.compute.ComputeChecks
 import com.pixipanda.qualitycheck.config.ConfigParser
 import com.pixipanda.qualitycheck.report.ReportBuilder
 import com.typesafe.scalalogging.LazyLogging
@@ -14,7 +13,7 @@ object QualityCheck extends LazyLogging {
 
     ConfigParser.parse() match {
       case Right(qualityCheckConfig) =>
-        val result = ComputeChecks.runChecks(qualityCheckConfig)
+        val result = ComputeChecks.runChecks(qualityCheckConfig.sources)
         val sourceStats = result.stats
         val report = ReportBuilder.buildReport(sourceStats)
         report.show(false)
