@@ -1,13 +1,11 @@
-package com.pixipanda.qualitycheck.jobs
-
+package com.pixipanda.qualitycheck
 
 import com.pixipanda.qualitycheck.compute.ComputeChecks
 import com.pixipanda.qualitycheck.config.ConfigParser
 import com.pixipanda.qualitycheck.report.ReportBuilder
 import com.typesafe.scalalogging.LazyLogging
 
-
-object QualityCheck extends LazyLogging {
+object Main extends LazyLogging {
 
   def main(args: Array[String]): Unit = {
 
@@ -17,11 +15,12 @@ object QualityCheck extends LazyLogging {
     val result = ComputeChecks.runChecks(qualityCheckConfig.sources)
     val sourceStats = result.stats
     val reportDF = ReportBuilder.buildReport(sourceStats)
-    if(!sourceStats.last.isSuccess) {
+    if (!sourceStats.last.isSuccess) {
       logger.error("QualityCheck Failed")
       logger.info("outputStatsFile: " + outputStatsFile)
       ReportBuilder.saveReport(reportDF, outputStatsFile)
       System.exit(1)
     }
+
   }
 }
