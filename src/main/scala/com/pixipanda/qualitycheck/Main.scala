@@ -21,6 +21,5 @@ object Main extends LazyLogging {
       ReportBuilder.saveReport(reportDF, outputStatsFile)
       System.exit(1)
     }
-
   }
 }

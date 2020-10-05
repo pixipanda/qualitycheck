@@ -26,14 +26,13 @@ object ReportBuilder extends Spark{
     val reportDF = rows.toList.toDF
     val qualityStatReport = reportDF
       .select("label", "checkReport.*")
-      .withColumn("jobRunDate", current_date())
+      .withColumn("jobRunDateTime", current_timestamp())
 
     qualityStatReport
   }
 
 
   def saveReport(df: DataFrame, path: String): Unit = {
-    df.show(false)
     df.coalesce(1).write.mode(SaveMode.Overwrite).csv(path)
   }
 }
