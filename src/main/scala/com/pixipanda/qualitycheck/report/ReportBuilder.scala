@@ -5,31 +5,37 @@ import com.pixipanda.qualitycheck.stat.sourcestat.SourceStat
 import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions._
 
-import scala.collection.mutable.ListBuffer
 
 object ReportBuilder extends Spark{
 
-  def buildReport(sourceStats: Seq[SourceStat]): DataFrame = {
+  def buildReport(sourcesStat: Seq[SourceStat]): Seq[SourceStatReport] = {
+    sourcesStat.map(buildReport)
+  }
 
-    val rows = ListBuffer[SourceStatReport]()
 
-    sourceStats.foreach(sourceStat => {
-      sourceStat.stats.foreach(checkStat => {
-        val checkStatReport = checkStat.getReportStat
-        checkStatReport.foreach(report => {
-          rows.append(SourceStatReport(sourceStat.label, report))
-        })
-      })
-    })
+  def buildReportDF(sourcesStat: Seq[SourceStat]): DataFrame = {
+    val sourcesStatReport = sourcesStat.map(buildReport)
+    createDF(sourcesStatReport)
+  }
+
+
+  def createDF(sourceStatReport: Seq[SourceStatReport]): DataFrame = {
 
     import spark.implicits._
-    val reportDF = rows.toList.toDF
-    val qualityStatReport = reportDF
-      .select("label", "checkReport.*")
-      .withColumn("jobRunDateTime", current_timestamp())
 
-    qualityStatReport
+    val sourceStatReportDF = sourceStatReport.toDF()
+    val checksStatReportDF = sourceStatReportDF.select($"label", explode($"checksStatReport").as("checksStatReport"))
+    val columnsStatReportDF = checksStatReportDF.select($"label", explode($"checksStatReport.columnsStatReport").as("columnsStatReport"))
+    val qualityCheckDF = columnsStatReportDF.select("label", "columnsStatReport.*")
+    qualityCheckDF
   }
+
+
+  def buildReport(sourceStat: SourceStat): SourceStatReport = {
+    val checkStatReport =  sourceStat.stats.map(_.getReportStat)
+    SourceStatReport(sourceStat.label, checkStatReport)
+  }
+
 
 
   def saveReport(df: DataFrame, path: String): Unit = {

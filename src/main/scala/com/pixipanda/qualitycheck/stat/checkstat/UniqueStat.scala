@@ -1,29 +1,33 @@
 package com.pixipanda.qualitycheck.stat.checkstat
 
-import com.pixipanda.qualitycheck.constant.Checks._
 import com.pixipanda.qualitycheck.constant.Stats.UNIQUESTAT
-import com.pixipanda.qualitycheck.report.CheckStatReport
+import com.pixipanda.qualitycheck.report.{CheckStatReport, ColumnStatReport}
 
-import scala.collection.mutable.ListBuffer
 
-case class UniqueStat(
-  statMap: Map[String, Long]
-) extends  CheckStat(false) {
+case class UniqueStat(statMap: Map[String, Long], isSuccess: Boolean = false) extends  CheckStat {
 
-  override def getReportStat: Seq[CheckStatReport] = {
-    val stats = ListBuffer[CheckStatReport]()
-    statMap.foreach({
+  override def getReportStat: CheckStatReport = {
+    val columnsStatReport = statMap.map({
       case (column, actual) =>
-        val reportStat = CheckStatReport(UNIQUESTAT,
+        ColumnStatReport(UNIQUESTAT,
           column,
           "eq",
           "0",
           actual.toString,
           this.getValidation
         )
-        stats.append(reportStat)
-    })
-    stats.toList
+    }).toList
+    CheckStatReport(columnsStatReport)
   }
 
+  /*
+   * This function validates Uniques Stats.
+   * If there are duplicate records for the give set of columns then returns false else returns true
+   */
+  override def validate: CheckStat = {
+    val status = this.statMap.forall{
+      case (_, count) => count == 0
+    }
+    UniqueStat(this.statMap, status)
+  }
 }

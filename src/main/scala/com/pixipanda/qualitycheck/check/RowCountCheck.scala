@@ -13,12 +13,16 @@ import scala.collection.mutable
 
 case class RowCountCheck(count:Int, relation:String, override val checkType: String) extends  Check(checkType) {
 
-  override def getStat(df: DataFrame): Option[CheckStat] = {
+  /*
+   * This function computes the row count stats for a given dataFrame
+   * It returns the computed stat
+   *
+   */
+  override def getStat(df: DataFrame): CheckStat = {
     val rowCountStatMap = mutable.Map[RowCountCheck, Long]()
     val count = df.count()
     rowCountStatMap.put(this, count)
-    val rowCountStat = RowCountStat(rowCountStatMap.toMap)
-    Some(rowCountStat)
+    RowCountStat(rowCountStatMap.toMap)
   }
 }
 

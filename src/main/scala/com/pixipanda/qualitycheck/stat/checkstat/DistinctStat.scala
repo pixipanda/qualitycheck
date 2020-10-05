@@ -2,29 +2,49 @@ package com.pixipanda.qualitycheck.stat.checkstat
 
 import com.pixipanda.qualitycheck.check.DistinctRelation
 import com.pixipanda.qualitycheck.constant.Stats.DISTINCTSTAT
-import com.pixipanda.qualitycheck.report.CheckStatReport
-
-import scala.collection.mutable.ListBuffer
+import com.pixipanda.qualitycheck.report.{CheckStatReport, ColumnStatReport}
 
 
-case class DistinctStat(
-  statMap: Map[DistinctRelation, Long]
-) extends  CheckStat(false) {
 
-  override def getReportStat: Seq[CheckStatReport] = {
-    val stats = ListBuffer[CheckStatReport]()
+case class DistinctStat(statMap: Map[DistinctRelation, Long], isSuccess: Boolean = false) extends  CheckStat {
 
-    statMap.foreach({
-      case (distinctRelation, actual) =>
-        val reportStat = CheckStatReport(DISTINCTSTAT,
+  override def getReportStat: CheckStatReport = {
+
+    val columnsStatReport = statMap.map({
+      case (distinctRelation: DistinctRelation, actual) =>
+        ColumnStatReport(
+          DISTINCTSTAT,
           distinctRelation.columns.mkString(":"),
           distinctRelation.relation,
           distinctRelation.count.toString,
           actual.toString,
-          this.getValidation)
-        stats.append(reportStat)
-    })
-    stats.toList
+          this.getValidation
+        )
+    }).toList
+
+    CheckStatReport(columnsStatReport)
   }
+
+  /*
+   * This function validates Distinct Stats.
+   * If the computed stats does not match the config then returns false else returns true
+   */
+  override def validate:CheckStat = {
+
+    val distinctStatMap = this.statMap
+
+    val status = distinctStatMap.forall{
+      case(distinctConfig, actual) =>
+        distinctConfig.relation match {
+          case "gt" => actual > distinctConfig.count
+          case "ge" => actual >= distinctConfig.count
+          case "lt" => actual < distinctConfig.count
+          case "le" => actual <= distinctConfig.count
+          case "eq" => actual == distinctConfig.count
+        }
+    }
+    DistinctStat(distinctStatMap, status)
+  }
+
 }
 

@@ -12,14 +12,13 @@ object Main extends LazyLogging {
     val outputStatsFile = args(0)
 
     val qualityCheckConfig = ConfigParser.parseQualityCheck()
-    val result = ComputeChecks.runChecks(qualityCheckConfig.sources)
-    val sourceStats = result.stats
-    val reportDF = ReportBuilder.buildReport(sourceStats)
-    if (!sourceStats.last.isSuccess) {
+    val sourcesStat = ComputeChecks.runChecks(qualityCheckConfig.sources)
+    val isSuccess = sourcesStat.forall(_.isSuccess)
+    if(!isSuccess) {
       logger.error("QualityCheck Failed")
       logger.info("outputStatsFile: " + outputStatsFile)
+      val reportDF = ReportBuilder.buildReportDF(sourcesStat)
       ReportBuilder.saveReport(reportDF, outputStatsFile)
-      System.exit(1)
     }
   }
 }

@@ -1,5 +1,3 @@
 package com.pixipanda.qualitycheck.report
 
-case class SourceStatReport(label:String,
-                            checkReport: CheckStatReport
-)
+final case class SourceStatReport(label:String, checksStatReport: Seq[CheckStatReport])

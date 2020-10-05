@@ -1,27 +1,37 @@
 package com.pixipanda.qualitycheck.stat.checkstat
 
 import com.pixipanda.qualitycheck.constant.Stats.NULLSTAT
-import com.pixipanda.qualitycheck.report.CheckStatReport
+import com.pixipanda.qualitycheck.report.{CheckStatReport, ColumnStatReport}
 
-import scala.collection.mutable.ListBuffer
 
-case class NullStat(
-  statMap: Map[String, Long]
-  ) extends  CheckStat(false) {
+case class NullStat(statMap: Map[String, Long], isSuccess: Boolean = false) extends  CheckStat {
 
-  override def getReportStat: Seq[CheckStatReport] = {
-    val stats = ListBuffer[CheckStatReport]()
-    statMap.foreach({
+  override def getReportStat: CheckStatReport = {
+
+    val columnsStatReport = statMap.map({
       case (column, actual) =>
-        val reportStat = CheckStatReport(NULLSTAT,
+        ColumnStatReport(NULLSTAT,
           column,
-          "eq",
+          "gt",
           "0",
           actual.toString,
           this.getValidation
         )
-        stats.append(reportStat)
-    })
-    stats.toList
+    }).toList
+    CheckStatReport(columnsStatReport)
+  }
+
+  /*
+   * This function validates Null Stats.
+   * If the computed stats does not match the config then returns false else returns true
+   */
+  override def validate: CheckStat = {
+
+    val nullStatMap = this.statMap
+
+    val status = nullStatMap.forall {
+      case (_, count) => count == 0
+    }
+    NullStat(nullStatMap, status)
   }
 }

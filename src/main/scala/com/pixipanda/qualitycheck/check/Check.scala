@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
 
 abstract class Check(val checkType: String) {
 
-  def getStat(df: DataFrame):Option[CheckStat]
+  def getStat(df: DataFrame):CheckStat
 }
 
 object Check extends LazyLogging {

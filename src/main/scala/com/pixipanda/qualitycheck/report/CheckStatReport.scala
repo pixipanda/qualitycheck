@@ -1,9 +1,11 @@
 package com.pixipanda.qualitycheck.report
 
-case class CheckStatReport(statName: String,
-                           columns: String,
-                           relation: String,
-                           configValue: String,
-                           actual: String,
-                           validation: String
-)
+
+final case class ColumnStatReport(statName: String,
+                            columns: String,
+                            relation: String,
+                            configValue: String,
+                            actual: String,
+                            validation: String
+                           )
+final case class CheckStatReport(columnsStatReport: Seq[ColumnStatReport])

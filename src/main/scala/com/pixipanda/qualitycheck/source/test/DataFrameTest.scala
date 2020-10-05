@@ -30,9 +30,7 @@ abstract class DataFrameTest(
 
   override def getSourceType: String = sourceType
 
-  override def exists: Boolean = {
-    true
-  }
+  override def exists: Boolean = true
 
   override def getLabel: String = {
     val common = s"$sourceType:$dbName:$tableName"

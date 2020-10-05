@@ -13,7 +13,7 @@ object CheckTestHelper extends {
       val checks = source.getChecks
       checks.foreach(check => {
         val sut = check.getStat(df)
-        assert(sut.contains(stat))
+        assert(sut == stat)
       })
     })
   }

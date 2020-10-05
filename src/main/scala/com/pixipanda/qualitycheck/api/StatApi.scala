@@ -13,10 +13,9 @@ object StatApi {
 
 
   private def buildStats(qualityCheckConfig: QualityCheckConfig):DataFrame = {
-    val result = ComputeChecks.runChecks(qualityCheckConfig.sources)
-    val sourceStat = result.stats
-    ReportBuilder.buildReport(sourceStat)
-
+    val qualityCheckConfig = ConfigParser.parseQualityCheck()
+    val sourcesStat = ComputeChecks.runChecks(qualityCheckConfig.sources)
+    ReportBuilder.buildReportDF(sourcesStat)
   }
 
   def saveAsJson(config:Config, outputPath: String):Unit = {
