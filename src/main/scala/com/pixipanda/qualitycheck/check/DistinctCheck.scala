@@ -15,22 +15,19 @@ import scala.collection.JavaConverters._
 
 case class DistinctRelation(columns: Seq[String], count:Int, relation: String)
 
+
 case class DistinctCheck(distinctCheck: Seq[DistinctRelation], override val checkType: String) extends Check(checkType) {
 
-  override def getStat(df: DataFrame): Option[CheckStat] = {
+  override def getStat(df: DataFrame): CheckStat = {
 
     val distinctStatMap = mutable.Map[DistinctRelation, Long]()
 
-    if(distinctCheck.nonEmpty) {
-      distinctCheck.foreach(dCheck => {
-        val distinctCount = getDistinctCount(df, dCheck.columns.toList)
-        distinctStatMap.put(dCheck, distinctCount)
-      })
-      val distinctStat = DistinctStat(distinctStatMap.toMap)
-      Some(distinctStat)
-    } else {
-      None
-    }
+    distinctCheck.foreach(dCheck => {
+      val distinctCount = getDistinctCount(df, dCheck.columns.toList)
+      distinctStatMap.put(dCheck, distinctCount)
+    })
+    DistinctStat(distinctStatMap.toMap)
+
   }
 
 
@@ -42,6 +39,7 @@ case class DistinctCheck(distinctCheck: Seq[DistinctRelation], override val chec
   private def getDistinctCount(df:DataFrame, columns:List[String]):Long = {
     df.select(columns.toSet.map(col).toList: _*).distinct().count()
   }
+
 }
 
 object DistinctRelation extends LazyLogging {

@@ -11,14 +11,14 @@ class ReportBuilderSpec extends FunSpec{
     describe("Functionality") {
 
       it("Success Report") {
-        val result = ComputeChecks.runChecks(TestConfig.successConfig.sources)
-        val report = ReportBuilder.buildReport(result.stats)
+        val sourcesStat = ComputeChecks.runChecks(TestConfig.successConfig.sources)
+        val report = ReportBuilder.buildReportDF(sourcesStat)
         report.show(false)
       }
 
       it("Failure Report") {
-        val result = ComputeChecks.runChecks(TestConfig.failureConfig.sources)
-        val report = ReportBuilder.buildReport(result.stats)
+        val sourcesStat = ComputeChecks.runChecks(TestConfig.failureConfig.sources)
+        val report = ReportBuilder.buildReportDF(sourcesStat)
         report.show(false)
       }
     }

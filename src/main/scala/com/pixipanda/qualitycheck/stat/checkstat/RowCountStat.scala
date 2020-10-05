@@ -2,28 +2,44 @@ package com.pixipanda.qualitycheck.stat.checkstat
 
 import com.pixipanda.qualitycheck.check.RowCountCheck
 import com.pixipanda.qualitycheck.constant.Stats._
-import com.pixipanda.qualitycheck.report.CheckStatReport
-
-import scala.collection.mutable.ListBuffer
+import com.pixipanda.qualitycheck.report.{CheckStatReport, ColumnStatReport}
 
 
-case class RowCountStat(
-  statMap: Map[RowCountCheck, Long]
-) extends  CheckStat(false) {
 
-  override def getReportStat: Seq[CheckStatReport] = {
-    val stats = ListBuffer[CheckStatReport]()
-    statMap.foreach({
+case class RowCountStat(statMap: Map[RowCountCheck, Long], isSuccess: Boolean = false) extends  CheckStat {
+
+  override def getReportStat: CheckStatReport = {
+    val rowCountStatReport = statMap.map({
       case (rowCountCheck, actual) =>
-        val reportStat = CheckStatReport(ROWCOUNTSTAT,
+        ColumnStatReport(ROWCOUNTSTAT,
           "NA",
           rowCountCheck.relation,
           rowCountCheck.count.toString,
           actual.toString,
           this.getValidation
         )
-        stats.append(reportStat)
-    })
-    stats.toList
+    }).toList
+    CheckStatReport(rowCountStatReport)
+  }
+
+  /*
+    This function validates RowCount Stats.
+    If the computed stats does not match the config then returns false else returns true
+   */
+  override def validate:CheckStat = {
+
+    val rowCountStatMap = this.statMap
+
+    val status = rowCountStatMap.forall{
+      case(rowCountConfig, actual) =>
+        rowCountConfig.relation match {
+          case "gt" => actual > rowCountConfig.count
+          case "ge" => actual >= rowCountConfig.count
+          case "lt" => actual < rowCountConfig.count
+          case "le" => actual <= rowCountConfig.count
+          case "eq" => actual == rowCountConfig.count
+        }
+    }
+    RowCountStat(rowCountStatMap, status)
   }
 }

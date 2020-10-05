@@ -14,21 +14,22 @@ class ComputeChecksSpec extends FunSpec {
     describe("Functionality") {
 
       val exists = true
+      val isSuccess = true
 
       val rowCountStatMap = Map(RowCountCheck(0, "gt", ROWCOUNTCHECK) -> 4L)
-      val rowCountStat = RowCountStat(rowCountStatMap)
+      val rowCountStat = RowCountStat(rowCountStatMap, isSuccess)
 
 
       val nullStatMap = Map("quantity" -> 0L)
-      val nullStat = NullStat(nullStatMap)
+      val nullStat = NullStat(nullStatMap, isSuccess)
 
 
       val distinctStatMap = Map(DistinctRelation(List("item"), 2, "ge") -> 4L)
-      val distinctStat = DistinctStat(distinctStatMap)
+      val distinctStat = DistinctStat(distinctStatMap, isSuccess)
 
 
       val uniqueStatMap = Map("item" -> 0L, "price" -> 0L, "quantity" -> 0L)
-      val uniqueStat = UniqueStat(uniqueStatMap)
+      val uniqueStat = UniqueStat(uniqueStatMap, isSuccess)
 
 
       val stats:List[CheckStat] = List(
@@ -38,9 +39,8 @@ class ComputeChecksSpec extends FunSpec {
         uniqueStat
       )
 
-      it("checkStats success") {
-        val isSuccess = true
-        val expectedResult = Result(stats, isSuccess)
+      it("should run checks and should return success for each stats") {
+        val expectedResult = SourceStat(exists, "testSpark:testDb:testTable", isSuccess, stats)
         val sources = TestConfig.successConfig.sources
 
         sources.foreach(source => {
@@ -52,31 +52,23 @@ class ComputeChecksSpec extends FunSpec {
         })
       }
 
-      it("checkStats null check failure") {
+      it("should run null check and should return failure status") {
         val isSuccess = false
         val nullStatMap = Map("quantity" -> 1L)
-        val nullStat = NullStat(nullStatMap)
-        val expectedResult = Result[CheckStat](List(rowCountStat, nullStat), isSuccess)
+        val nullStat = NullStat(nullStatMap, isSuccess)
+        val expectedResult = List(SourceStat(exists, "testSpark:testDb:testTable:testquery", isSuccess, List(rowCountStat, nullStat, distinctStat, uniqueStat)))
 
         val sources = TestConfig.failureConfig.sources
 
-        sources.foreach(source => {
-          val sut = ComputeChecks.runChecks(source)
-          assert(sut == expectedResult)
-          val lastStat = sut.stats.last
-          assert(!lastStat.isSuccess)
-          val otherStats = sut.stats.init
-          otherStats.foreach(stat => {
-             assert(stat.isSuccess)
-          })
-        })
+        val sut = ComputeChecks.runChecks(sources)
+        assert(sut == expectedResult)
+        val sut1 = sut.forall(_.isSuccess)
+        assert(!sut1)
       }
 
-      val isSuccess = true
-      val sourceStat = SourceStat(exists, "testSpark:testDb:testTable", isSuccess, stats)
-      val expectedResult = Result(List(sourceStat), isSuccess)
 
-      it("sourceStats success") {
+      it("should run checks and should return success sourceStats") {
+        val expectedResult = List(SourceStat(exists, "testSpark:testDb:testTable", isSuccess, stats))
         val sut = ComputeChecks.runChecks(TestConfig.successConfig.sources)
         assert(sut == expectedResult)
       }

@@ -16,26 +16,25 @@ import scala.collection.JavaConverters._
 
 case class UniqueCheck(uniqueChecks: Seq[Seq[String]], override val checkType: String) extends  Check(checkType){
 
-  override def getStat(df: DataFrame): Option[CheckStat] = {
+  /*
+   * This function computes unique stats for a given set of columns and a dataFrame
+   *
+   */
+  override def getStat(df: DataFrame): CheckStat = {
 
     val uniqueCheckMap = mutable.Map[String, Long]()
 
-    if (uniqueChecks.nonEmpty) {
-      uniqueChecks.foreach(columns => {
-        val key = columns.mkString(":")
-        val duplicateCount = getDuplicateCount(df,columns.toList)
-        uniqueCheckMap.put(key, duplicateCount)
-      })
-      val uniqueStat = UniqueStat(uniqueCheckMap.toMap)
-      Some(uniqueStat)
-    }else {
-      None
-    }
+    uniqueChecks.foreach(columns => {
+      val key = columns.mkString(":")
+      val duplicateCount = getDuplicateCount(df,columns.toList)
+      uniqueCheckMap.put(key, duplicateCount)
+    })
+    UniqueStat(uniqueCheckMap.toMap)
   }
 
   /*
-    This function returns duplicate count for a given set of columns on a dataFrame
-  */
+   * This function returns duplicate count for a given set of columns on a dataFrame
+   */
   def getDuplicateCount(df:DataFrame, columns:List[String]): Long = {
     val sparkColumns = columns.map(col)
     df.select(sparkColumns: _*)
@@ -43,6 +42,7 @@ case class UniqueCheck(uniqueChecks: Seq[Seq[String]], override val checkType: S
       .filter(col("count") > 1).count()
   }
 }
+
 
 object UniqueCheck {
   implicit  val uniqueCheckDecoder:Decoder[UniqueCheck] = new Decoder[UniqueCheck] {

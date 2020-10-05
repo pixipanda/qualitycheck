@@ -15,21 +15,17 @@ import scala.collection.JavaConverters._
 
 case class NullCheck(columns: Seq[String], override val checkType: String) extends Check(checkType) {
 
-  override def getStat(df:DataFrame): Option[CheckStat] = {
+  override def getStat(df:DataFrame): CheckStat = {
 
     val nullStatMap = mutable.Map[String, Long]()
 
-    if(columns.nonEmpty) {
-      columns.foreach(column => {
-        val count = nullCount(df, column)
-        nullStatMap.put(column, count)
-      })
-      val nullStat = NullStat(nullStatMap.toMap)
-      Some(nullStat)
-    } else {
-      None
-    }
+    columns.foreach(column => {
+      val count = nullCount(df, column)
+      nullStatMap.put(column, count)
+    })
+    NullStat(nullStatMap.toMap)
   }
+
 
   private def nullCount(df:DataFrame, column:String) = {
     df.filter(col(column).isNull or col(column) === "null").count()

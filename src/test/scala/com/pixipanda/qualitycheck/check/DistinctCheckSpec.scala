@@ -33,7 +33,7 @@ class DistinctCheckSpec extends FunSpec with TestingSparkSession{
     }
 
     describe("functionality") {
-      val config = QualityCheckConfig(
+      val qualityCheckConfig = QualityCheckConfig(
         List(
           Hive(
             "hive",
@@ -56,7 +56,7 @@ class DistinctCheckSpec extends FunSpec with TestingSparkSession{
         val dF= mkDF(spark, itemMap.toSeq: _*)
         val distinctStatMap = Map(DistinctRelation(List("item"), 2, "ge") -> 4L)
         val distinctStat = DistinctStat(distinctStatMap)
-        CheckTestHelper.testStat(config, distinctStat, dF)
+        CheckTestHelper.testStat(qualityCheckConfig, distinctStat, dF)
       }
     }
   }
