@@ -4,10 +4,10 @@ import cats.syntax.either._
 import com.pixipanda.qualitycheck.constant.Checks._
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, RowCountStat}
 import com.typesafe.config.Config
-import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.DataFrame
 import io.circe.Decoder.Result
 import io.circe._
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 
@@ -26,7 +26,9 @@ case class RowCountCheck(count:Int, relation:String, override val checkType: Str
   }
 }
 
-object  RowCountCheck extends  LazyLogging {
+object  RowCountCheck {
+
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
   implicit val rowCountDecoder:Decoder[RowCountCheck] = new Decoder[RowCountCheck] {
     override def apply(c: HCursor): Result[RowCountCheck] = {
@@ -38,6 +40,7 @@ object  RowCountCheck extends  LazyLogging {
   }
 
   def parse(config: Config): RowCountCheck = {
+    LOGGER.info("Parsing rowCountCheck")
     val rowCountConfig = config.getConfig("rowCountCheck")
     val count = rowCountConfig.getInt("count")
     val relation = rowCountConfig.getString("relation")

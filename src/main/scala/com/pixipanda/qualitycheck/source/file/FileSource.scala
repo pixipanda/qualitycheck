@@ -7,8 +7,10 @@ import com.pixipanda.qualitycheck.config.Options
 import com.pixipanda.qualitycheck.source.Source
 import com.typesafe.config.Config
 import org.apache.spark.sql.DataFrame
+import org.slf4j.{Logger, LoggerFactory}
 
 final case class FileSource(sourceType: String, options: Map[String,String], checks: Seq[Check]) extends Source(sourceType) {
+
 
   override def getChecks: Seq[Check] = checks
 
@@ -35,7 +37,11 @@ final case class FileSource(sourceType: String, options: Map[String,String], che
 
 object  FileSource {
 
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
+
   def parse(config: Config): Source =  {
+    LOGGER.info(s"Parsing file config")
+    LOGGER.debug(s"Parsing file config: $config")
     val sourceType = config.getString("type")
     val optionsConfig = config.getConfig("options")
     val options = Options.parse(optionsConfig)

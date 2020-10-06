@@ -4,9 +4,12 @@ import com.pixipanda.qualitycheck.Spark
 import com.pixipanda.qualitycheck.stat.sourcestat.SourceStat
 import org.apache.spark.sql.{DataFrame, SaveMode}
 import org.apache.spark.sql.functions._
+import org.slf4j.{Logger, LoggerFactory}
 
 
 object ReportBuilder extends Spark{
+
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
   def buildReport(sourcesStat: Seq[SourceStat]): Seq[SourceStatReport] = {
     sourcesStat.map(buildReport)
@@ -21,6 +24,7 @@ object ReportBuilder extends Spark{
 
   def createDF(sourceStatReport: Seq[SourceStatReport]): DataFrame = {
 
+    LOGGER.info("Creating Report DataFrame")
     import spark.implicits._
 
     val sourceStatReportDF = sourceStatReport.toDF()
@@ -32,6 +36,7 @@ object ReportBuilder extends Spark{
 
 
   def buildReport(sourceStat: SourceStat): SourceStatReport = {
+    LOGGER.info(s"Building Report for the source: ${sourceStat.label}")
     val checkStatReport =  sourceStat.stats.map(_.getReportStat)
     SourceStatReport(sourceStat.label, checkStatReport)
   }

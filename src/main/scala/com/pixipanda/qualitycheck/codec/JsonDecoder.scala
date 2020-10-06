@@ -7,13 +7,15 @@ import com.pixipanda.qualitycheck.check.RowCountCheck._
 import com.pixipanda.qualitycheck.constant.DataStores._
 import com.pixipanda.qualitycheck.source.Source
 import com.pixipanda.qualitycheck.source.table.{Hive, Teradata}
-import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder.Result
 import io.circe._
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ListBuffer
 
-object JsonDecoder extends LazyLogging{
+object JsonDecoder {
+
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
   def decodeChecks(c:HCursor):List[Check] = {
 
@@ -23,14 +25,14 @@ object JsonDecoder extends LazyLogging{
       case Some(rowCountCheckJson) => parser.decode[RowCountCheck](rowCountCheckJson.toString) match {
         case Right(rowCountCheck) => checkBuffer.append(rowCountCheck)
       }
-      case None => logger.info(s"rowCountCheck not specified")
+      case None => LOGGER.info(s"rowCountCheck not specified")
     }
 
     c.downField("nullCheck").focus match {
       case Some(_) => parser.decode[NullCheck](c.value.toString) match {
         case Right(nullCheck) => checkBuffer.append(nullCheck)
       }
-      case None => logger.info(s"nullCheck not specified")
+      case None => LOGGER.info(s"nullCheck not specified")
     }
 
     c.downField("distinctChecks").focus match {
@@ -39,14 +41,14 @@ object JsonDecoder extends LazyLogging{
           val distinctCheck = DistinctCheck(distinctRelation, DISTINCTCHECK)
           checkBuffer.append(distinctCheck)
       }
-      case None => logger.info(s"distinctChecks not specified")
+      case None => LOGGER.info(s"distinctChecks not specified")
     }
 
     c.downField("uniqueChecks").focus match {
       case Some(_) => parser.decode[UniqueCheck](c.value.toString) match {
         case Right(uniqueCheck) => checkBuffer.append(uniqueCheck)
       }
-      case None => logger.info(s"uniqueChecks not specified")
+      case None => LOGGER.info(s"uniqueChecks not specified")
     }
 
     checkBuffer.toList
@@ -69,7 +71,7 @@ object JsonDecoder extends LazyLogging{
           .map(_(hCursor)) match {
           case Some(x) => x
           case None =>
-            logger.error(s"Unknown Check `$tableType` in config! Choose one of: ${tableDecoders.keys.mkString(", ")}.")
+            LOGGER.error(s"Unknown Check `$tableType` in config! Choose one of: ${tableDecoders.keys.mkString(", ")}.")
             throw new RuntimeException(s"Unknown Check in config `$tableType`")
         }
 

@@ -2,6 +2,7 @@ package com.pixipanda.qualitycheck
 
 import org.apache.spark.sql.{SQLContext, SparkSession}
 import org.apache.spark.{SparkConf, SparkContext}
+import org.slf4j.{Logger, LoggerFactory}
 
 trait Spark {
   implicit lazy val spark: SparkSession = Spark.sparkSingleton
@@ -10,6 +11,8 @@ trait Spark {
 }
 
 object Spark {
+
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
   private def isLinux = {
     "Linux" == System.getProperty("os.name")

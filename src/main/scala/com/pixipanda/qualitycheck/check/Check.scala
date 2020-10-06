@@ -3,8 +3,8 @@ package com.pixipanda.qualitycheck.check
 
 import com.pixipanda.qualitycheck.stat.checkstat.CheckStat
 import com.typesafe.config.Config
-import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.DataFrame
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ListBuffer
 
@@ -15,10 +15,13 @@ abstract class Check(val checkType: String) {
   def getStat(df: DataFrame):CheckStat
 }
 
-object Check extends LazyLogging {
+object Check {
+
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
   def parse(config: Config): Seq[Check] = {
 
+    LOGGER.info("Parsing checks")
     val checkBuffer = new ListBuffer[Check]
 
     if(config.hasPath("rowCountCheck")) {
