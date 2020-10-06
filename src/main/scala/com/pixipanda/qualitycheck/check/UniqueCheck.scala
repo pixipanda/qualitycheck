@@ -10,6 +10,7 @@ import io.circe.Decoder.Result
 import io.circe._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 import scala.collection.JavaConverters._
@@ -45,6 +46,9 @@ case class UniqueCheck(uniqueChecks: Seq[Seq[String]], override val checkType: S
 
 
 object UniqueCheck {
+
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
+
   implicit  val uniqueCheckDecoder:Decoder[UniqueCheck] = new Decoder[UniqueCheck] {
     override def apply(c: HCursor): Result[UniqueCheck] = {
       for {
@@ -54,6 +58,9 @@ object UniqueCheck {
   }
 
   def parse(config: Config): UniqueCheck = {
+
+    LOGGER.info("Parsing uniqueChecks")
+
     val uniqueChecks: Seq[Seq[String]] = config.getList("uniqueChecks")
       .unwrapped
       .asScala.toList

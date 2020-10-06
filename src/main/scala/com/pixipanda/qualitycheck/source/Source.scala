@@ -6,8 +6,8 @@ import com.pixipanda.qualitycheck.constant.DataStores._
 import com.pixipanda.qualitycheck.source.file.FileSource
 import com.pixipanda.qualitycheck.source.table.Table
 import com.typesafe.config.Config
-import com.typesafe.scalalogging.LazyLogging
 import org.apache.spark.sql.DataFrame
+import org.slf4j.{Logger, LoggerFactory}
 
 
 abstract class Source(sourceType: String) extends  Spark {
@@ -23,7 +23,9 @@ abstract class Source(sourceType: String) extends  Spark {
   def getLabel: String
 }
 
-object Source extends LazyLogging{
+object Source{
+
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
   def parse(config: Config): Source = {
     val sourceType = config.getString("type")
@@ -38,7 +40,7 @@ object Source extends LazyLogging{
         ORC |
         PARQUET => FileSource.parse(config)
       case _ =>
-        logger.error(s"Unknown DataStores $sourceType in config!")
+        LOGGER.error(s"Unknown DataStores $sourceType in config!")
         throw new RuntimeException(s"Unknown DataStores in config $sourceType")
     }
   }

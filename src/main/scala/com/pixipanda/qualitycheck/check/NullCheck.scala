@@ -4,11 +4,11 @@ import cats.syntax.either._
 import com.pixipanda.qualitycheck.constant.Checks.NULLCHECK
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, NullStat}
 import com.typesafe.config.Config
-import com.typesafe.scalalogging.LazyLogging
 import io.circe.Decoder.Result
 import io.circe._
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable
 import scala.collection.JavaConverters._
@@ -32,7 +32,9 @@ case class NullCheck(columns: Seq[String], override val checkType: String) exten
   }
 }
 
-object NullCheck extends  LazyLogging {
+object NullCheck {
+
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
   implicit val nullCheckDecoder:Decoder[NullCheck] = new Decoder[NullCheck] {
     override def apply(c: HCursor): Result[NullCheck] = {
@@ -43,6 +45,7 @@ object NullCheck extends  LazyLogging {
   }
 
   def parse(config: Config): NullCheck = {
+    LOGGER.info("Parsing nullCheck")
     val columns = config.getStringList("nullCheck").asScala.toList
     NullCheck(columns, NULLCHECK)
   }

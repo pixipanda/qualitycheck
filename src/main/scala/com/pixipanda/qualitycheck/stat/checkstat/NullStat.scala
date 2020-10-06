@@ -2,11 +2,16 @@ package com.pixipanda.qualitycheck.stat.checkstat
 
 import com.pixipanda.qualitycheck.constant.Stats.NULLSTAT
 import com.pixipanda.qualitycheck.report.{CheckStatReport, ColumnStatReport}
+import org.slf4j.{Logger, LoggerFactory}
 
 
 case class NullStat(statMap: Map[String, Long], isSuccess: Boolean = false) extends  CheckStat {
 
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
+
   override def getReportStat: CheckStatReport = {
+
+    LOGGER.info(s"Creating NULLSTAT")
 
     val columnsStatReport = statMap.map({
       case (column, actual) =>
@@ -26,6 +31,8 @@ case class NullStat(statMap: Map[String, Long], isSuccess: Boolean = false) exte
    * If the computed stats does not match the config then returns false else returns true
    */
   override def validate: CheckStat = {
+
+    LOGGER.info(s"Validating NULLSTAT")
 
     val nullStatMap = this.statMap
 
