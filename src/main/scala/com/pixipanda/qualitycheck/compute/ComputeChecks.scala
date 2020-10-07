@@ -30,7 +30,7 @@ object ComputeChecks{
       val isSuccess = checkStat.forall(_.isSuccess)
       SourceStat(exists, source.getLabel, isSuccess, checkStat)
     }else {
-      LOGGER.warn(s"Source: $source does not exist")
+      LOGGER.warn(s"Source: ${source.getLabel} does not exist")
       SourceStat(exists, source.getLabel, fail, Nil)
     }
   }
