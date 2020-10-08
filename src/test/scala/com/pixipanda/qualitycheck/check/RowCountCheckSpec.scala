@@ -30,6 +30,7 @@ class RowCountCheckSpec extends FunSpec with TestingSparkSession{
     }
 
     describe("functionality") {
+      val checkOnDF = true
       val config = QualityCheckConfig(
         List(
           Hive(
@@ -37,6 +38,8 @@ class RowCountCheckSpec extends FunSpec with TestingSparkSession{
             "db1",
             "table1",
             "query1",
+            checkOnDF,
+            None,
             List(
               RowCountCheck(0, "gt", ROWCOUNTCHECK)
             )

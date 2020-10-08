@@ -2,6 +2,7 @@ package com.pixipanda.qualitycheck.check
 
 import cats.syntax.either._
 import com.pixipanda.qualitycheck.constant.Checks.DISTINCTCHECK
+import com.pixipanda.qualitycheck.source.table.Table
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, DistinctStat}
 import com.typesafe.config.Config
 import io.circe.Decoder.Result
@@ -10,7 +11,6 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.collection.mutable
 import scala.collection.JavaConverters._
 
 case class DistinctRelation(columns: Seq[String], count:Int, relation: String)
@@ -18,24 +18,36 @@ case class DistinctRelation(columns: Seq[String], count:Int, relation: String)
 
 case class DistinctCheck(distinctCheck: Seq[DistinctRelation], override val checkType: String) extends Check(checkType) {
 
+
   override def getStat(df: DataFrame): CheckStat = {
 
-    val distinctStatMap = mutable.Map[DistinctRelation, Long]()
-
-    distinctCheck.foreach(dCheck => {
+    val distinctStatMap = distinctCheck.map(dCheck => {
       val distinctCount = getDistinctCount(df, dCheck.columns.toList)
-      distinctStatMap.put(dCheck, distinctCount)
-    })
-    DistinctStat(distinctStatMap.toMap)
-
+      (dCheck, distinctCount)
+    }).toMap
+    DistinctStat(distinctStatMap)
   }
 
 
+  /*
+   * This function computes row count stats for a given table.
+   * Here predicate push is used. i.e data is not loaded from table to spark. Instead query is sent to the table
+   * Loading table data to spark just to compute row count is not efficient. Instead sending query to the table is efficient
+   */
+  def getStat(table: Table):CheckStat = {
+
+
+    val distinctStatMap = table.getDistinctQueries(distinctCheck).map{
+      case (dCheck: DistinctRelation, query: String) => dCheck -> predicatePushCount(table.options.get, query)(table.spark)
+    }.toMap
+    DistinctStat(distinctStatMap)
+  }
+
 
   /*
-    Returns distinct count for the given set of columns on a dataFrame.
-    Also handles duplicate column names
-  */
+   *  Returns distinct count for the given set of columns on a dataFrame.
+   *  Also handles duplicate column names
+   */
   private def getDistinctCount(df:DataFrame, columns:List[String]):Long = {
     df.select(columns.toSet.map(col).toList: _*).distinct().count()
   }

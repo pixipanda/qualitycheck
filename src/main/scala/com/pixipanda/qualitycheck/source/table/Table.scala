@@ -1,6 +1,7 @@
 package com.pixipanda.qualitycheck.source.table
 
-import com.pixipanda.qualitycheck.check.Check
+import com.pixipanda.qualitycheck.check.{Check, DistinctRelation}
+import com.pixipanda.qualitycheck.config.Options
 import com.pixipanda.qualitycheck.constant.DataStores._
 import com.pixipanda.qualitycheck.source.Source
 import com.typesafe.config.Config
@@ -13,15 +14,33 @@ abstract class Table(sourceType: String, query: String) extends Source(sourceTyp
   def getTable: String
 
   def getQuery:String
+
+  def getDistinctQueries(distinctCheck: Seq[DistinctRelation]): Seq[(DistinctRelation, String)] = {
+
+    distinctCheck.map(dr =>  {
+      val query = s"""
+                     |SELECT COUNT(DISTINCT ${dr.columns.mkString(",")})
+                     |FROM $getDb.$getTable
+       """.stripMargin
+      (dr, query)
+    })
+  }
+
+  def rowCountQuery: String = {
+    s"(select count(*) as count from $getDb.$getTable) t"
+  }
 }
 
 object Table {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
+  val checkONDF = true
+
   private def parserQuery(config: Config): String = {
     if(config.hasPath("query")) config.getString("query") else null
   }
+
 
   def parse(config: Config): Source =  {
 
@@ -32,14 +51,15 @@ object Table {
     val dbName = config.getString("dbName")
     val tableName = config.getString("tableName")
     val query = parserQuery(config)
+    val options = Options.parse(config)
     val checksConfig = config.getConfig("checks")
     val checks = Check.parse(checksConfig)
 
     LOGGER.info(s"Source type is $sourceType")
 
     sourceType match {
-      case HIVE => Hive(sourceType, dbName, tableName, query, checks)
-      case TERADATA => Teradata(sourceType, dbName, tableName, query, checks)
+      case HIVE => Hive(sourceType, dbName, tableName, query, checkONDF, options, checks)
+      case TERADATA => Teradata(sourceType, dbName, tableName, query, checkONDF, options, checks)
     }
   }
 }

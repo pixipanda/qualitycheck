@@ -10,11 +10,16 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
 
   override def beforeAll(): Unit = TestingSparkSession.configTestLog4j("OFF", "OFF")
 
+  val hiveCheckOnDF = true
+  val teraDataCheckOnDF = true // It is set to false as we don't have teraData setup.
+
   val hiveSource =  Hive(
     "hive",
     "db1",
     "table1",
     "query1",
+    hiveCheckOnDF,
+    None,
     List(
       RowCountCheck(0, "gt", ROWCOUNTCHECK),
       NullCheck(List( "colA", "colB",  "colC", "colD"), NULLCHECK),
@@ -41,6 +46,8 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
     "db2",
     "table2",
     null,
+    teraDataCheckOnDF,
+    None,
     List(
       RowCountCheck(0, "gt", ROWCOUNTCHECK),
       NullCheck(List( "colA", "colB",  "colC", "colD"), NULLCHECK),
@@ -65,9 +72,7 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
 
   describe("ConfigParser") {
 
-    val expectedHiveConfig = QualityCheckConfig(List(hiveSource))
-
-    it("should correctly parse simple conf string") {
+    it("should correctly parse simple conf string for hive source") {
       val configString =
         """
           |qualityCheck {
@@ -99,14 +104,14 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
           |  ]
           |}
         """.stripMargin
+
+      val expectedHiveConfig = QualityCheckConfig(List(hiveSource))
       val testQualityCheckConfig = ConfigParser.parseString(configString)
       assert(testQualityCheckConfig == expectedHiveConfig)
     }
 
 
-    val expectedNoQueryTeraDataConfig = QualityCheckConfig(List(teraDataNullQuerySource))
-
-    it("should correctly parse config string without query field") {
+    it("should correctly parse teradata config string without query field") {
 
       val noQueryConfigString =
         """
@@ -139,15 +144,16 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
           |}
         """.stripMargin
 
+      val expectedNoQueryTeraDataConfig = QualityCheckConfig(List(teraDataNullQuerySource))
       val testQualityCheckConfig = ConfigParser.parseString(noQueryConfigString)
       assert(testQualityCheckConfig == expectedNoQueryTeraDataConfig)
     }
 
 
-    val expectedConfig = QualityCheckConfig(List(hiveSource, teraDataNullQuerySource))
-    it("should correctly parse simple conf file") {
-      val testQualityCheckConfig = ConfigParser.parse()
-      assert(testQualityCheckConfig == Right(expectedConfig))
+    it("should correctly parse simple application.conf file") {
+      val expectedConfig = QualityCheckConfig(List(hiveSource, teraDataNullQuerySource))
+      val testQualityCheckConfig = ConfigParser.parseQualityCheck()
+      assert(testQualityCheckConfig == expectedConfig)
     }
   }
 }

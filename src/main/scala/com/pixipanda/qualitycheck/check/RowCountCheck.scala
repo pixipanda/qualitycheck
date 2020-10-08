@@ -2,6 +2,7 @@ package com.pixipanda.qualitycheck.check
 
 import cats.syntax.either._
 import com.pixipanda.qualitycheck.constant.Checks._
+import com.pixipanda.qualitycheck.source.table.Table
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, RowCountStat}
 import com.typesafe.config.Config
 import org.apache.spark.sql.DataFrame
@@ -19,12 +20,26 @@ case class RowCountCheck(count:Int, relation:String, override val checkType: Str
    *
    */
   override def getStat(df: DataFrame): CheckStat = {
+    val rowCountStatMap = Map(this -> df.count())
+    RowCountStat(rowCountStatMap)
+  }
+
+  /*
+   * This function computes row count stats for a given table.
+   * Here predicate push is used. i.e data is not loaded from table to spark. Instead query is sent to the table
+   */
+  def getStat(table: Table):CheckStat = {
+
     val rowCountStatMap = mutable.Map[RowCountCheck, Long]()
-    val count = df.count()
+    val query = table.rowCountQuery
+    val count = predicatePushCount(table.options.get, query)(table.spark)
     rowCountStatMap.put(this, count)
     RowCountStat(rowCountStatMap.toMap)
   }
+
 }
+
+
 
 object  RowCountCheck {
 
