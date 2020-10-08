@@ -21,6 +21,10 @@ abstract class Source(sourceType: String) extends  Spark {
   def exists: Boolean
 
   def getLabel: String
+
+  def checkOnDF: Boolean
+
+  def options: Option[Map[String, String]]
 }
 
 object Source{

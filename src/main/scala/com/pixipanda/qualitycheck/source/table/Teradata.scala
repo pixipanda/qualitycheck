@@ -13,7 +13,9 @@ final case class Teradata(
   dbName: String,
   tableName: String,
   query: String,
-  checks: Seq[Check]) extends Source(sourceType){
+  checkOnDF: Boolean,
+  options:Option[Map[String, String]],
+  checks: Seq[Check]) extends Table(sourceType, query){
 
   override def getChecks: Seq[Check] = checks
 
@@ -44,11 +46,14 @@ final case class Teradata(
     else
       s"$common"
   }
-
 }
+
+
 object Teradata {
 
   def fromJson(hCursor: HCursor): Source = {
+
+    val checkOnDF = true
     val sourceType = hCursor.downField("type").as[String].right.get
     val dbName = hCursor.downField("dbName").as[String].right.get
     val tableName = hCursor.downField("tableName").as[String].right.get
@@ -57,6 +62,6 @@ object Teradata {
     // because each itemJson downField will become List[Either[DecodeFailure, Int]] so we need to use cats to traverse List[Either] to Either[List]
     // each of as[Int] returns a Result[Int] and Result[Int] has a type of Either[DecodeFailure,A] which will become List[Either]
     val checks = JsonDecoder.decodeChecks(checksJson.hcursor)
-    Teradata(sourceType, dbName, tableName, query, checks)
+    Teradata(sourceType, dbName, tableName, query, checkOnDF, None, checks)
   }
 }

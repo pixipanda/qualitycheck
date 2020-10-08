@@ -12,7 +12,6 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.col
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.collection.mutable
 import scala.collection.JavaConverters._
 
 case class UniqueCheck(uniqueChecks: Seq[Seq[String]], override val checkType: String) extends  Check(checkType){
@@ -23,14 +22,12 @@ case class UniqueCheck(uniqueChecks: Seq[Seq[String]], override val checkType: S
    */
   override def getStat(df: DataFrame): CheckStat = {
 
-    val uniqueCheckMap = mutable.Map[String, Long]()
-
-    uniqueChecks.foreach(columns => {
+    val uniqueCheckMap = uniqueChecks.map(columns => {
       val key = columns.mkString(":")
       val duplicateCount = getDuplicateCount(df,columns.toList)
-      uniqueCheckMap.put(key, duplicateCount)
-    })
-    UniqueStat(uniqueCheckMap.toMap)
+      (key, duplicateCount)
+    }).toMap
+    UniqueStat(uniqueCheckMap)
   }
 
   /*

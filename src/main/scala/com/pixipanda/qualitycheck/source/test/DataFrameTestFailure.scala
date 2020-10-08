@@ -7,8 +7,10 @@ final case class DataFrameTestFailure(
   dbName: String,
   tableName: String,
   query: String,
+  checkOnDF:Boolean = true,
+  options: Option[Map[String, String]],
   checks: Seq[Check]
-) extends DataFrameTest(sourceType, dbName, tableName, query, checks) {
+) extends DataFrameTest(sourceType, dbName, tableName,query, checks) {
 
   override val data: Map[String, List[Any]] = Map(
     "item"     -> List("Eggs", "Milk", "Bread", "Cheese"),

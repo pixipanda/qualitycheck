@@ -10,20 +10,16 @@ import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions._
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.collection.mutable
 import scala.collection.JavaConverters._
 
 case class NullCheck(columns: Seq[String], override val checkType: String) extends Check(checkType) {
 
   override def getStat(df:DataFrame): CheckStat = {
 
-    val nullStatMap = mutable.Map[String, Long]()
-
-    columns.foreach(column => {
-      val count = nullCount(df, column)
-      nullStatMap.put(column, count)
-    })
-    NullStat(nullStatMap.toMap)
+    val nullStatMap = columns.map(column => {
+      (column, nullCount(df, column))
+    }).toMap
+    NullStat(nullStatMap)
   }
 
 
