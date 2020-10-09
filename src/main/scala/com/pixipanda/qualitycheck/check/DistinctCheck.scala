@@ -30,9 +30,8 @@ case class DistinctCheck(distinctCheck: Seq[DistinctRelation], checkType: String
 
 
   /*
-   * This function computes row count stats for a given table.
+   * This function computes distinct check stats for a given table.
    * Here predicate push is used. i.e data is not loaded from table to spark. Instead query is sent to the table
-   * Loading table data to spark just to compute row count is not efficient. Instead sending query to the table is efficient
    */
   override def getStat(jdbcSource: JDBC):CheckStat = {
 

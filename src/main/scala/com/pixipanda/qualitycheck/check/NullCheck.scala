@@ -25,9 +25,8 @@ case class NullCheck(columns: Seq[String], checkType: String) extends Check {
 
 
   /*
-   * This function computes row count stats for a given table.
+   * This function computes null check stats for a given table.
    * Here predicate push is used. i.e data is not loaded from table to spark. Instead query is sent to the table
-   * Loading table data to spark just to compute row count is not efficient. Instead sending query to the table is efficient
    */
   override def getStat(jdbcSource: JDBC): CheckStat = {
     LOGGER.info(s"null count check on jdbc source: ${jdbcSource.sourceType}")
