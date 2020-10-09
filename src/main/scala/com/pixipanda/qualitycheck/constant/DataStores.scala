@@ -9,4 +9,7 @@ object DataStores {
   val XML = "xml"
   val ORC = "orc"
   val PARQUET = "parquet"
+  val MYSQL = "mysql"
+  val ORACLE = "oracle"
+  val POSTGRES = "postgres"
 }

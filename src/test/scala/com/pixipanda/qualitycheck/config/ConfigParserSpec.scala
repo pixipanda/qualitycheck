@@ -1,9 +1,9 @@
 package com.pixipanda.qualitycheck.config
 
 import com.pixipanda.qualitycheck.constant.Checks._
-import com.pixipanda.qualitycheck.{QualityCheckConfig, TestingSparkSession}
+import com.pixipanda.qualitycheck.{QualityCheckConfig, TestConfig, TestingSparkSession}
 import com.pixipanda.qualitycheck.check.{DistinctCheck, DistinctRelation, NullCheck, RowCountCheck, UniqueCheck}
-import com.pixipanda.qualitycheck.source.table.{Hive, Teradata}
+import com.pixipanda.qualitycheck.source.table.{Hive, JDBC}
 import org.scalatest.{BeforeAndAfterAll, FunSpec}
 
 class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
@@ -11,7 +11,7 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
   override def beforeAll(): Unit = TestingSparkSession.configTestLog4j("OFF", "OFF")
 
   val hiveCheckOnDF = true
-  val teraDataCheckOnDF = true // It is set to false as we don't have teraData setup.
+  val mySqlCheckOnDF = false // It is set to false as we don't have teraData setup.
 
   val hiveSource =  Hive(
     "hive",
@@ -19,7 +19,6 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
     "table1",
     "query1",
     hiveCheckOnDF,
-    None,
     List(
       RowCountCheck(0, "gt", ROWCOUNTCHECK),
       NullCheck(List( "colA", "colB",  "colC", "colD"), NULLCHECK),
@@ -41,13 +40,13 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
     )
   )
 
-  val teraDataNullQuerySource = Teradata(
-    "teradata",
+  val mySqlSourceNoQuery = JDBC(
+    "mysql",
     "db2",
     "table2",
     null,
-    teraDataCheckOnDF,
-    None,
+    mySqlCheckOnDF,
+    TestConfig.mySqlOptions,
     List(
       RowCountCheck(0, "gt", ROWCOUNTCHECK),
       NullCheck(List( "colA", "colB",  "colC", "colD"), NULLCHECK),
@@ -111,16 +110,22 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
     }
 
 
-    it("should correctly parse teradata config string without query field") {
+    it("should correctly parse mysql config string without query field") {
 
       val noQueryConfigString =
         """
           |qualityCheck  {
           |  sources = [
           |    {
-          |      type = "teradata"
+          |      type = "mysql"
           |      dbName = "db2"
           |      tableName = "table2"
+          |      options {
+          |        url = "jdbc:mysql://localhost:3306/classicmodels"
+          |        user = "hduser"
+          |        password = "hadoop123"
+          |        driver = "com.mysql.jdbc.Driver"
+          |      }
           |      checks {
           |        rowCountCheck {
           |          count = 0,
@@ -144,14 +149,14 @@ class ConfigParserSpec extends FunSpec with BeforeAndAfterAll{
           |}
         """.stripMargin
 
-      val expectedNoQueryTeraDataConfig = QualityCheckConfig(List(teraDataNullQuerySource))
+      val expectedNoQueryTeraDataConfig = QualityCheckConfig(List(mySqlSourceNoQuery))
       val testQualityCheckConfig = ConfigParser.parseString(noQueryConfigString)
       assert(testQualityCheckConfig == expectedNoQueryTeraDataConfig)
     }
 
 
     it("should correctly parse simple application.conf file") {
-      val expectedConfig = QualityCheckConfig(List(hiveSource, teraDataNullQuerySource))
+      val expectedConfig = QualityCheckConfig(List(hiveSource, mySqlSourceNoQuery))
       val testQualityCheckConfig = ConfigParser.parseQualityCheck()
       assert(testQualityCheckConfig == expectedConfig)
     }

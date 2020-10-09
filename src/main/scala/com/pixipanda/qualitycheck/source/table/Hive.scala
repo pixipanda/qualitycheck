@@ -13,17 +13,7 @@ final case class Hive(
                  tableName: String,
                  query: String,
                  checkOnDF: Boolean,
-                 options:Option[Map[String, String]],
-                 checks: Seq[Check]) extends Table(sourceType, query){
-
-
-  override  def getChecks: Seq[Check] = checks
-
-  def getDb: String = dbName
-
-  def getTable: String = tableName
-
-  def getQuery:String = query
+                 checks: Seq[Check]) extends Table(dbName, tableName, query){
 
   override def getDF:DataFrame = {
     if(null != query) {
@@ -33,18 +23,8 @@ final case class Hive(
     }
   }
 
-  override def getSourceType: String = sourceType
-
   override def exists: Boolean = {
     spark.catalog.tableExists(dbName,tableName)
-  }
-
-  override def getLabel: String = {
-    val common = s"$sourceType:$dbName:$tableName"
-    if (null != query)
-      s"$common:query"
-    else
-      s"$common"
   }
 
 }
@@ -61,6 +41,6 @@ object Hive {
     // because each itemJson downField will become List[Either[DecodeFailure, Int]] so we need to use cats to traverse List[Either] to Either[List]
     // each of as[Int] returns a Result[Int] and Result[Int] has a type of Either[DecodeFailure,A] which will become List[Either]
     val checks = JsonDecoder.decodeChecks(checksJson.hcursor)
-    Hive(sourceType, dbName, tableName, query, checkOnDF, None, checks)
+    Hive(sourceType, dbName, tableName, query, checkOnDF, checks)
   }
 }

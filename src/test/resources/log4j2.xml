@@ -26,7 +26,7 @@
 
     <!-- Types of Loggers -->
     <Loggers>
-        <Root level="WARN">
+        <Root level="INFO">
             <AppenderRef ref="Console"/>
             <AppenderRef ref="LogFile"/>
         </Root>

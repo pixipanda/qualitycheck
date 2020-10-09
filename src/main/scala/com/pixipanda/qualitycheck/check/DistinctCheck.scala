@@ -2,7 +2,7 @@ package com.pixipanda.qualitycheck.check
 
 import cats.syntax.either._
 import com.pixipanda.qualitycheck.constant.Checks.DISTINCTCHECK
-import com.pixipanda.qualitycheck.source.table.Table
+import com.pixipanda.qualitycheck.source.table.JDBC
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, DistinctStat}
 import com.typesafe.config.Config
 import io.circe.Decoder.Result
@@ -34,11 +34,9 @@ case class DistinctCheck(distinctCheck: Seq[DistinctRelation], override val chec
    * Here predicate push is used. i.e data is not loaded from table to spark. Instead query is sent to the table
    * Loading table data to spark just to compute row count is not efficient. Instead sending query to the table is efficient
    */
-  def getStat(table: Table):CheckStat = {
-
-
-    val distinctStatMap = table.getDistinctQueries(distinctCheck).map{
-      case (dCheck: DistinctRelation, query: String) => dCheck -> predicatePushCount(table.options.get, query)(table.spark)
+  override def getStat(jdbcSource: JDBC):CheckStat = {
+    val distinctStatMap = jdbcSource.distinctQueries(distinctCheck).map{
+      case (dCheck: DistinctRelation, query: String) => dCheck -> jdbcSource.predicatePushCount(query)
     }.toMap
     DistinctStat(distinctStatMap)
   }

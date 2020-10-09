@@ -19,14 +19,13 @@ object ComputeChecks{
 
   def runChecks(source: Source):SourceStat = {
 
-    LOGGER.info(s"Running checks on source: $source")
+    LOGGER.info(s"Running checks on source: ${source.sourceType}")
 
     val exists = source.exists
     val fail = false
     if(exists) {
-      val checks = source.getChecks
-      val df = source.getDF
-      val checkStat = runChecks(checks, df)
+      val checks = source.checks
+      val checkStat = checks.map(_.getStat(source).validate)
       val isSuccess = checkStat.forall(_.isSuccess)
       SourceStat(exists, source.getLabel, isSuccess, checkStat)
     }else {
@@ -37,6 +36,6 @@ object ComputeChecks{
 
 
   def runChecks(checks: Seq[Check], df: DataFrame): Seq[CheckStat] = {
-    checks.map(_.getStat(df)).map(_.validate)
+    checks.map(_.getStat(df).validate)
   }
 }

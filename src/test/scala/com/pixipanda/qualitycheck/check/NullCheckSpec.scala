@@ -12,7 +12,7 @@ class NullCheckSpec extends FunSpec with TestingSparkSession{
 
   describe("NullCheck") {
     describe("config parsing") {
-      it("basic config parsing") {
+      it("should parse nullcheck config string") {
         val nullCheckString =
           """
             | nullCheck = ["quantity"]
@@ -33,7 +33,6 @@ class NullCheckSpec extends FunSpec with TestingSparkSession{
             "table1",
             "query1",
             checkOnDF,
-            None,
             List(
               NullCheck(List("quantity"), NULLCHECK)
             )
