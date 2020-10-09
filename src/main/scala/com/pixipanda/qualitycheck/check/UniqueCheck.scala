@@ -31,6 +31,11 @@ case class UniqueCheck(uniqueChecks: Seq[Seq[String]], checkType: String) extend
     UniqueStat(uniqueCheckMap)
   }
 
+
+  /*
+   * This function computes unique check stats for a given table.
+   * Here predicate push is used. i.e data is not loaded from table to spark. Instead query is sent to the table
+   */
   override def getStat(jdbcSource: JDBC): CheckStat = {
     LOGGER.info(s"null count check on jdbc source: ${jdbcSource.sourceType}")
     val uniqueCheckStatMap = uniqueChecks.map(columns => {
