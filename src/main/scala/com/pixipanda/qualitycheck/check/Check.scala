@@ -2,10 +2,10 @@ package com.pixipanda.qualitycheck.check
 
 
 import com.pixipanda.qualitycheck.source.Source
-import com.pixipanda.qualitycheck.source.table.Table
+import com.pixipanda.qualitycheck.source.table.JDBC
 import com.pixipanda.qualitycheck.stat.checkstat.CheckStat
 import com.typesafe.config.Config
-import org.apache.spark.sql.{DataFrame, SparkSession}
+import org.apache.spark.sql.DataFrame
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.mutable.ListBuffer
@@ -14,32 +14,20 @@ import scala.collection.mutable.ListBuffer
 
 abstract class Check(val checkType: String) {
 
+  val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
+
   def getStat(df: DataFrame):CheckStat
 
-  def predicatePushCount(jdbcOptions: Map[String, String], query: String)(implicit spark: SparkSession):Long = {
-
-    spark.read
-      .format("jdbc")
-      .options(
-        Map(
-          "url" -> jdbcOptions("url"),
-          "user" -> jdbcOptions("username"),
-          "password" -> jdbcOptions("password"),
-          "dbtable" -> query,
-          "driver" -> jdbcOptions("driver")
-        )
-      )
-      .load()
-      .collect()(0).getAs[Long]("count")
-  }
-
+  def getStat(jdbcSource: JDBC): CheckStat
 
   def getStat(source: Source): CheckStat = {
 
     if(source.checkOnDF) {
+      LOGGER.info("Running quality check on DataFrame")
       getStat(source.getDF)
     } else {
-      getStat(source.asInstanceOf[Table])
+      LOGGER.info("Running quality check using predicate push")
+      getStat(source.asInstanceOf[JDBC])
     }
   }
 }

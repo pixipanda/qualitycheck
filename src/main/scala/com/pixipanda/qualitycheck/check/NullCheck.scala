@@ -2,6 +2,7 @@ package com.pixipanda.qualitycheck.check
 
 import cats.syntax.either._
 import com.pixipanda.qualitycheck.constant.Checks.NULLCHECK
+import com.pixipanda.qualitycheck.source.table.JDBC
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, NullStat}
 import com.typesafe.config.Config
 import io.circe.Decoder.Result
@@ -21,6 +22,9 @@ case class NullCheck(columns: Seq[String], override val checkType: String) exten
     }).toMap
     NullStat(nullStatMap)
   }
+
+
+  override def getStat(jdbcSource: JDBC): CheckStat = ???
 
 
   private def nullCount(df:DataFrame, column:String) = {

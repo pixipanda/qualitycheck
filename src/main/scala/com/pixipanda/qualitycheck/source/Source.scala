@@ -10,21 +10,19 @@ import org.apache.spark.sql.DataFrame
 import org.slf4j.{Logger, LoggerFactory}
 
 
-abstract class Source(sourceType: String) extends  Spark {
+abstract class Source extends  Spark {
 
-  def getChecks: Seq[Check]
+  def checks: Seq[Check]
 
   def getDF:DataFrame
 
-  def getSourceType: String
+  def sourceType: String
 
   def exists: Boolean
 
   def getLabel: String
 
   def checkOnDF: Boolean
-
-  def options: Option[Map[String, String]]
 }
 
 object Source{
@@ -35,14 +33,9 @@ object Source{
     val sourceType = config.getString("type")
     sourceType match {
       case
-        HIVE |
-        TERADATA => Table.parse(config)
+        HIVE | MYSQL | ORACLE | POSTGRES | TERADATA => Table.parse(config)
       case
-        CSV |
-        XML |
-        JSON |
-        ORC |
-        PARQUET => FileSource.parse(config)
+        CSV | XML | JSON | ORC | PARQUET => FileSource.parse(config)
       case _ =>
         LOGGER.error(s"Unknown DataStores $sourceType in config!")
         throw new RuntimeException(s"Unknown DataStores in config $sourceType")

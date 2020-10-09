@@ -15,7 +15,7 @@ class UniqueCheckSpec extends FunSpec with TestingSparkSession{
 
     describe("config parsing") {
 
-      it("basic config parsing") {
+      it("should parse unique check config string") {
         val uniqueCheckString =
           """
             |uniqueChecks = [
@@ -41,7 +41,6 @@ class UniqueCheckSpec extends FunSpec with TestingSparkSession{
             "table1",
             "query1",
             checkOnDF,
-            None,
             List(
               UniqueCheck(List(List("item"), List("price"), List("quantity")), UNIQUECHECK)
             )
@@ -49,7 +48,7 @@ class UniqueCheckSpec extends FunSpec with TestingSparkSession{
         )
       )
 
-      it("uniqueCheck success") {
+      it("should give uniqueCheck stat") {
         val itemMap = Map(
           "item"     -> List("Eggs", "Milk", "Bread", "Cheese"),
           "price"    -> List(  5.49,   3.89,    4.50,     6.00),

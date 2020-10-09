@@ -9,33 +9,27 @@ import com.typesafe.config.Config
 import org.apache.spark.sql.DataFrame
 import org.slf4j.{Logger, LoggerFactory}
 
-final case class FileSource(sourceType: String, checkOnDF: Boolean, options: Option[Map[String,String]], checks: Seq[Check]) extends Source(sourceType) {
+final case class FileSource(sourceType: String, checkOnDF: Boolean, options: Map[String,String], checks: Seq[Check]) extends Source {
 
-
-  override def getChecks: Seq[Check] = checks
 
   override def getDF: DataFrame = {
     spark.read
-      .format(fileOptions("format"))
-      .options(fileOptions)
-      .load(fileOptions("path"))
+      .format(options("format"))
+      .options(options)
+      .load(options("path"))
   }
 
-  override def getSourceType: String = sourceType
 
   override def exists: Boolean = {
-    val fileOptions = options.get
-    val file = new File(fileOptions("path"))
+    val file = new File(options("path"))
     file.exists()
   }
 
   override def getLabel: String = {
-    val file = new File(fileOptions("path"))
+    val file = new File(options("path"))
     val fileName = file.getName
     s"$sourceType:$fileName"
   }
-
-  private def fileOptions = options.get
 }
 
 object  FileSource {
@@ -49,7 +43,8 @@ object  FileSource {
     val checkOnDF = true
 
     val sourceType = config.getString("type")
-    val options = Options.parse(config)
+    val optionsConfig = config.getConfig("options")
+    val options = Options.parse(optionsConfig)
     val checksConfig = config.getConfig("checks")
     val checks = Check.parse(checksConfig)
     FileSource(sourceType, checkOnDF, options, checks)

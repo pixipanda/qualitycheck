@@ -45,4 +45,12 @@ object TestConfig {
     )
   )
 
+
+  val mySqlOptions: Map[String, String] = Map(
+    "url"-> "jdbc:mysql://localhost:3306/classicmodels",
+    "user" -> "hduser",
+    "password" -> "hadoop123",
+    "driver" -> "com.mysql.jdbc.Driver"
+  )
+
 }

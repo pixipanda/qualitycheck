@@ -4,6 +4,7 @@ import java.util
 
 import cats.syntax.either._
 import com.pixipanda.qualitycheck.constant.Checks.UNIQUECHECK
+import com.pixipanda.qualitycheck.source.table.JDBC
 import com.pixipanda.qualitycheck.stat.checkstat.{CheckStat, UniqueStat}
 import com.typesafe.config.Config
 import io.circe.Decoder.Result
@@ -29,6 +30,8 @@ case class UniqueCheck(uniqueChecks: Seq[Seq[String]], override val checkType: S
     }).toMap
     UniqueStat(uniqueCheckMap)
   }
+
+  override def getStat(jdbcSource: JDBC): CheckStat = ???
 
   /*
    * This function returns duplicate count for a given set of columns on a dataFrame

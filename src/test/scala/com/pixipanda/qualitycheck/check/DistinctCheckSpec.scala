@@ -14,7 +14,7 @@ class DistinctCheckSpec extends FunSpec with TestingSparkSession{
 
     describe("config parsing") {
 
-      it("basic config parsing") {
+      it("should parse distinct checks config string") {
         val distinctCheckString =
           """
             | distinctChecks = [
@@ -42,7 +42,6 @@ class DistinctCheckSpec extends FunSpec with TestingSparkSession{
             "table1",
             "query1",
             checkOnDF,
-            None,
             List(
               DistinctCheck(List(DistinctRelation(List("item"), 2, "ge")), DISTINCTCHECK)
             )
@@ -50,7 +49,7 @@ class DistinctCheckSpec extends FunSpec with TestingSparkSession{
         )
       )
 
-      it("distinct success") {
+      it("should return distinct stat") {
         val itemMap = Map(
           "item"     -> List("Eggs", "Milk", "Bread", "Cheese"),
           "price"    -> List(  5.49,   3.89,    4.50,     6.00),

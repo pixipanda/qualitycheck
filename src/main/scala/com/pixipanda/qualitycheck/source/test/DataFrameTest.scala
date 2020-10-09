@@ -10,7 +10,7 @@ abstract class DataFrameTest(
   dbName: String,
   tableName: String,
   query: String,
-  checks: Seq[Check]) extends Table(sourceType, query){
+  checks: Seq[Check]) extends Table(dbName, tableName, query){
 
   val data: Map[String, List[Any]] = Map(
     "item"     -> List("Eggs", "Milk", "Bread", "Cheese"),
@@ -18,17 +18,7 @@ abstract class DataFrameTest(
     "quantity" -> List(    12,      5,       2,       10)
   )
 
-  override  def getChecks: Seq[Check] = checks
-
-  def getDb: String = dbName
-
-  def getTable: String = tableName
-
-  def getQuery:String = query
-
   override def getDF:DataFrame = mkDF(data.toSeq: _*)
-
-  override def getSourceType: String = sourceType
 
   override def exists: Boolean = true
 

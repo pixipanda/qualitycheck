@@ -6,7 +6,7 @@ import com.pixipanda.qualitycheck.check._
 import com.pixipanda.qualitycheck.check.RowCountCheck._
 import com.pixipanda.qualitycheck.constant.DataStores._
 import com.pixipanda.qualitycheck.source.Source
-import com.pixipanda.qualitycheck.source.table.{Hive, Teradata}
+import com.pixipanda.qualitycheck.source.table.Hive
 import io.circe.Decoder.Result
 import io.circe._
 import org.slf4j.{Logger, LoggerFactory}
@@ -58,8 +58,8 @@ object JsonDecoder {
   implicit val baseTableDecoder: Decoder[Source] = new Decoder[Source] {
 
     private val tableDecoders = Map[String, HCursor =>Source](
-      HIVE -> Hive.fromJson,
-      TERADATA -> Teradata.fromJson
+      HIVE -> Hive.fromJson
+      //TERADATA -> Teradata.fromJson
     )
 
     final def apply(hCursor: HCursor): Result[Source] = {

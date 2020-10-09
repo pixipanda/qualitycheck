@@ -14,7 +14,7 @@ class RowCountCheckSpec extends FunSpec with TestingSparkSession{
 
     describe("config parsing") {
 
-      it("basic config parsing") {
+      it("should parse row count check config string") {
         val rowCountCheckString =
           """
             | rowCountCheck {
@@ -39,7 +39,6 @@ class RowCountCheckSpec extends FunSpec with TestingSparkSession{
             "table1",
             "query1",
             checkOnDF,
-            None,
             List(
               RowCountCheck(0, "gt", ROWCOUNTCHECK)
             )
@@ -47,7 +46,7 @@ class RowCountCheckSpec extends FunSpec with TestingSparkSession{
         )
       )
 
-      it("rowCount success") {
+      it("should give rowCount count stat") {
         val itemMap = Map(
           "item"     -> List("Eggs", "Milk", "Bread", "Cheese"),
           "price"    -> List(  5.49,   3.89,    4.50,     6.00),

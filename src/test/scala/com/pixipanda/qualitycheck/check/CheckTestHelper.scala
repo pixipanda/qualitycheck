@@ -10,7 +10,7 @@ object CheckTestHelper extends {
   def testStat(qualityCheckConfig: QualityCheckConfig, stat: CheckStat, df: DataFrame): Unit = {
     val sources = qualityCheckConfig.sources
     sources.foreach(source => {
-      val checks = source.getChecks
+      val checks = source.checks
       checks.foreach(check => {
         val sut = check.getStat(df)
         assert(sut == stat)

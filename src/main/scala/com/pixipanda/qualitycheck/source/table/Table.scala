@@ -7,27 +7,39 @@ import com.pixipanda.qualitycheck.source.Source
 import com.typesafe.config.Config
 import org.slf4j.{Logger, LoggerFactory}
 
-abstract class Table(sourceType: String, query: String) extends Source(sourceType){
+abstract class Table(dbName: String, tableName: String, query: String) extends Source {
 
-  def getDb: String
+  def getDb: String = dbName
 
-  def getTable: String
+  def getTable: String = tableName
 
-  def getQuery:String
+  def getQuery:String = query
 
-  def getDistinctQueries(distinctCheck: Seq[DistinctRelation]): Seq[(DistinctRelation, String)] = {
+
+  override def getLabel: String = {
+    val common = s"$sourceType:$dbName:$tableName"
+    if (null != query)
+      s"$common:query"
+    else
+      s"$common"
+  }
+
+  def distinctQueries(distinctCheck: Seq[DistinctRelation]): Seq[(DistinctRelation, String)] = {
 
     distinctCheck.map(dr =>  {
       val query = s"""
-                     |SELECT COUNT(DISTINCT ${dr.columns.mkString(",")})
-                     |FROM $getDb.$getTable
+                     |(SELECT COUNT(DISTINCT ${dr.columns.mkString(",")})
+                     |FROM $getDb.$getTable) t
        """.stripMargin
       (dr, query)
     })
   }
 
   def rowCountQuery: String = {
-    s"(select count(*) as count from $getDb.$getTable) t"
+    s"""
+       |(SELECT COUNT(*) as count
+       | FROM $getDb.$getTable) t
+       | """.stripMargin
   }
 }
 
@@ -51,15 +63,18 @@ object Table {
     val dbName = config.getString("dbName")
     val tableName = config.getString("tableName")
     val query = parserQuery(config)
-    val options = Options.parse(config)
     val checksConfig = config.getConfig("checks")
     val checks = Check.parse(checksConfig)
 
     LOGGER.info(s"Source type is $sourceType")
 
     sourceType match {
-      case HIVE => Hive(sourceType, dbName, tableName, query, checkONDF, options, checks)
-      case TERADATA => Teradata(sourceType, dbName, tableName, query, checkONDF, options, checks)
+      case HIVE => Hive(sourceType, dbName, tableName, query, checkONDF, checks)
+      case MYSQL | ORACLE | POSTGRES | TERADATA =>
+        val checkONDF = false
+        val optionsConfig = config.getConfig("options")
+        val options = Options.parse(optionsConfig)
+        JDBC(sourceType, dbName, tableName, query, checkONDF, options, checks)
     }
   }
 }
