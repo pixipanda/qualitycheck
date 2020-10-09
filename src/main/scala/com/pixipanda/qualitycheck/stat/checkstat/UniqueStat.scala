@@ -5,7 +5,7 @@ import com.pixipanda.qualitycheck.report.{CheckStatReport, ColumnStatReport}
 import org.slf4j.{Logger, LoggerFactory}
 
 
-case class UniqueStat(statMap: Map[String, Long], isSuccess: Boolean = false) extends  CheckStat {
+case class UniqueStat(statMap: Map[String, (Long, Boolean)]) extends  CheckStat {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -14,13 +14,13 @@ case class UniqueStat(statMap: Map[String, Long], isSuccess: Boolean = false) ex
     LOGGER.info(s"Creating UNIQUESTAT")
 
     val columnsStatReport = statMap.map({
-      case (column, actual) =>
+      case (column, (actual, isSuccess)) =>
         ColumnStatReport(UNIQUESTAT,
           column,
           "eq",
           "0",
           actual.toString,
-          this.getValidation
+          if(isSuccess)  "success" else "failed"
         )
     }).toList
     CheckStatReport(columnsStatReport)
@@ -34,9 +34,18 @@ case class UniqueStat(statMap: Map[String, Long], isSuccess: Boolean = false) ex
 
     LOGGER.info(s"Validating UNIQUESTAT")
 
-    val status = this.statMap.forall{
-      case (_, count) => count == 0
-    }
-    UniqueStat(this.statMap, status)
+    val validatedStat = this.statMap.map(keyValue =>{
+      val columns = keyValue._1
+      val (duplicateCount, _) = keyValue._2
+      if(duplicateCount == 0) columns -> (duplicateCount, true) else keyValue
+    })
+
+    UniqueStat(validatedStat)
+  }
+
+  override def isSuccess: Boolean = {
+    this.statMap.forall({
+      case (_, (_, isCheckSuccess)) => isCheckSuccess
+    })
   }
 }

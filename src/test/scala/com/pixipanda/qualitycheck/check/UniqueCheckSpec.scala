@@ -55,7 +55,7 @@ class UniqueCheckSpec extends FunSpec with TestingSparkSession{
           "quantity" -> List(    12,      5,       2,       10)
         )
         val dF= mkDF(spark, itemMap.toSeq: _*)
-        val uniqueStatMap = Map("item" -> 0L, "price" -> 0L, "quantity" -> 0L)
+        val uniqueStatMap = Map("item" -> (0L,false), "price" -> (0L,false), "quantity" -> (0L,false))
         val uniqueStat = UniqueStat(uniqueStatMap)
         CheckTestHelper.testStat(config, uniqueStat, dF)
       }

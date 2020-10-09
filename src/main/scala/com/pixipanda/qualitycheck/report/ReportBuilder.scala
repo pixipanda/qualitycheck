@@ -30,8 +30,10 @@ object ReportBuilder extends Spark{
     val sourceStatReportDF = sourceStatReport.toDF()
     val checksStatReportDF = sourceStatReportDF.select($"label", explode($"checksStatReport").as("checksStatReport"))
     val columnsStatReportDF = checksStatReportDF.select($"label", explode($"checksStatReport.columnsStatReport").as("columnsStatReport"))
-    val qualityCheckDF = columnsStatReportDF.select("label", "columnsStatReport.*")
-    qualityCheckDF
+    val qualityCheckReportDF = columnsStatReportDF
+      .select("label", "columnsStatReport.*")
+      .withColumn("jobRunDateTime", current_timestamp())
+    qualityCheckReportDF
   }
 
 

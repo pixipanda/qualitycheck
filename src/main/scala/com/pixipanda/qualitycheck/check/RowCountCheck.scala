@@ -11,7 +11,7 @@ import io.circe._
 import org.slf4j.{Logger, LoggerFactory}
 
 
-case class RowCountCheck(count:Int, relation:String, override val checkType: String) extends  Check(checkType) {
+case class RowCountCheck(count:Int, relation:String, checkType: String) extends  Check {
 
   /*
    * This function computes the row count stats for a given dataFrame
@@ -19,7 +19,7 @@ case class RowCountCheck(count:Int, relation:String, override val checkType: Str
    *
    */
   override def getStat(df: DataFrame): CheckStat = {
-    val rowCountStatMap = Map(this -> df.count())
+    val rowCountStatMap = Map(this -> (df.count(), false))
     RowCountStat(rowCountStatMap)
   }
 
@@ -32,7 +32,7 @@ case class RowCountCheck(count:Int, relation:String, override val checkType: Str
   override def getStat(jdbcSource: JDBC):CheckStat = {
     LOGGER.info(s"row count check on jdbc source: ${jdbcSource.sourceType}")
     val count = jdbcSource.predicatePushCount(jdbcSource.rowCountQuery)
-    RowCountStat(Map(this -> count))
+    RowCountStat(Map(this -> (count, false)))
   }
 }
 

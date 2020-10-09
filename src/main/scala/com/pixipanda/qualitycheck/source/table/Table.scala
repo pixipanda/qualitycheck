@@ -24,15 +24,13 @@ abstract class Table(dbName: String, tableName: String, query: String) extends S
       s"$common"
   }
 
-  def distinctQueries(distinctCheck: Seq[DistinctRelation]): Seq[(DistinctRelation, String)] = {
+  def distinctQuery(columns: Seq[String]): String = {
 
-    distinctCheck.map(dr =>  {
-      val query = s"""
-                     |(SELECT COUNT(DISTINCT ${dr.columns.mkString(",")})
-                     |FROM $getDb.$getTable) t
+      s"""
+        |(SELECT COUNT(DISTINCT ${columns.mkString(",")}) as count
+        | FROM $getDb.$getTable) t
        """.stripMargin
-      (dr, query)
-    })
+
   }
 
   def rowCountQuery: String = {
@@ -40,6 +38,26 @@ abstract class Table(dbName: String, tableName: String, query: String) extends S
        |(SELECT COUNT(*) as count
        | FROM $getDb.$getTable) t
        | """.stripMargin
+  }
+
+  def nullCountQuery(column: String): String = {
+    s"""
+       |(SELECT COUNT(*) as count
+       | FROM $getDb.$getTable
+         WHERE $column IS NULL) t
+       | """.stripMargin
+  }
+
+  def uniqueCheckQuery(columns: Seq[String]):String = {
+    s"""
+       |(SELECT COUNT(*) as count FROM
+       | ( SELECT ${columns.mkString(",")}, COUNT(*) as count
+       |   FROM $dbName.$tableName
+       |   GROUP BY ${columns.mkString(",")}
+       |   HAVING COUNT(*) > 1
+       | ) d
+       |) t
+     """.stripMargin
   }
 }
 

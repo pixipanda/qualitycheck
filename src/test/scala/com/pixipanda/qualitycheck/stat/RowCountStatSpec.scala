@@ -13,14 +13,14 @@ class RowCountStatSpec extends  FunSpec{
 
       val rowCountCheck = RowCountCheck(0, "gt", ROWCOUNTCHECK)
       it("should validate row count stat and return success") {
-        val rowCountStatMap = Map(rowCountCheck -> 4L)
+        val rowCountStatMap = Map(rowCountCheck -> (4L, true))
         val rowCountStat = RowCountStat(rowCountStatMap)
         val sut = rowCountStat.validate
         assert(sut.isSuccess)
       }
 
       it("should validate row count stat and return failure") {
-        val rowCountStatMap = Map(rowCountCheck -> 0L)
+        val rowCountStatMap = Map(rowCountCheck -> (0L, false))
         val rowCountStat = RowCountStat(rowCountStatMap)
         val sut = rowCountStat.validate
         assert(!sut.isSuccess)

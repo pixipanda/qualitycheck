@@ -16,14 +16,14 @@ import scala.collection.JavaConverters._
 case class DistinctRelation(columns: Seq[String], count:Int, relation: String)
 
 
-case class DistinctCheck(distinctCheck: Seq[DistinctRelation], override val checkType: String) extends Check(checkType) {
+case class DistinctCheck(distinctCheck: Seq[DistinctRelation], checkType: String) extends Check {
 
 
   override def getStat(df: DataFrame): CheckStat = {
 
     val distinctStatMap = distinctCheck.map(dCheck => {
       val distinctCount = getDistinctCount(df, dCheck.columns.toList)
-      (dCheck, distinctCount)
+      (dCheck, (distinctCount, false))
     }).toMap
     DistinctStat(distinctStatMap)
   }
@@ -35,9 +35,14 @@ case class DistinctCheck(distinctCheck: Seq[DistinctRelation], override val chec
    * Loading table data to spark just to compute row count is not efficient. Instead sending query to the table is efficient
    */
   override def getStat(jdbcSource: JDBC):CheckStat = {
-    val distinctStatMap = jdbcSource.distinctQueries(distinctCheck).map{
-      case (dCheck: DistinctRelation, query: String) => dCheck -> jdbcSource.predicatePushCount(query)
-    }.toMap
+
+    LOGGER.info(s"Distinct check on JDBC source: ${jdbcSource.sourceType}")
+
+    val distinctStatMap = distinctCheck.map(dRelation => {
+      val query = jdbcSource.distinctQuery(dRelation.columns)
+      val count = jdbcSource.predicatePushCount(query)
+      dRelation -> (count, false)
+    }).toMap
     DistinctStat(distinctStatMap)
   }
 

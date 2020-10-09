@@ -25,9 +25,9 @@ object ComputeChecks{
     val fail = false
     if(exists) {
       val checks = source.checks
-      val checkStat = checks.map(_.getStat(source).validate)
-      val isSuccess = checkStat.forall(_.isSuccess)
-      SourceStat(exists, source.getLabel, isSuccess, checkStat)
+      val checksStat = checks.map(_.getStat(source).validate)
+      val isSuccess = checksStat.forall(_.isSuccess)
+      SourceStat(exists, source.getLabel, isSuccess, checksStat)
     }else {
       LOGGER.warn(s"Source: ${source.getLabel} does not exist")
       SourceStat(exists, source.getLabel, fail, Nil)

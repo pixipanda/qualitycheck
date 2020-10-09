@@ -15,7 +15,7 @@ import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
 
-case class UniqueCheck(uniqueChecks: Seq[Seq[String]], override val checkType: String) extends  Check(checkType){
+case class UniqueCheck(uniqueChecks: Seq[Seq[String]], checkType: String) extends  Check {
 
   /*
    * This function computes unique stats for a given set of columns and a dataFrame
@@ -26,12 +26,21 @@ case class UniqueCheck(uniqueChecks: Seq[Seq[String]], override val checkType: S
     val uniqueCheckMap = uniqueChecks.map(columns => {
       val key = columns.mkString(":")
       val duplicateCount = getDuplicateCount(df,columns.toList)
-      (key, duplicateCount)
+      (key, (duplicateCount, false))
     }).toMap
     UniqueStat(uniqueCheckMap)
   }
 
-  override def getStat(jdbcSource: JDBC): CheckStat = ???
+  override def getStat(jdbcSource: JDBC): CheckStat = {
+    LOGGER.info(s"null count check on jdbc source: ${jdbcSource.sourceType}")
+    val uniqueCheckStatMap = uniqueChecks.map(columns => {
+      val key = columns.mkString(":")
+      val query = jdbcSource.uniqueCheckQuery(columns)
+      val duplicateCount = jdbcSource.predicatePushCount(query)
+      key -> (duplicateCount, false)
+    }).toMap
+    UniqueStat(uniqueCheckStatMap)
+  }
 
   /*
    * This function returns duplicate count for a given set of columns on a dataFrame

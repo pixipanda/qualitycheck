@@ -5,7 +5,7 @@ import com.pixipanda.qualitycheck.report.{CheckStatReport, ColumnStatReport}
 import org.slf4j.{Logger, LoggerFactory}
 
 
-case class NullStat(statMap: Map[String, Long], isSuccess: Boolean = false) extends  CheckStat {
+case class NullStat(statMap: Map[String, (Long, Boolean)]) extends  CheckStat {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -14,13 +14,13 @@ case class NullStat(statMap: Map[String, Long], isSuccess: Boolean = false) exte
     LOGGER.info(s"Creating NULLSTAT")
 
     val columnsStatReport = statMap.map({
-      case (column, actual) =>
+      case (column, (actual, isSuccess)) =>
         ColumnStatReport(NULLSTAT,
           column,
           "gt",
           "0",
           actual.toString,
-          this.getValidation
+          if(isSuccess)  "success" else "failed"
         )
     }).toList
     CheckStatReport(columnsStatReport)
@@ -36,9 +36,17 @@ case class NullStat(statMap: Map[String, Long], isSuccess: Boolean = false) exte
 
     val nullStatMap = this.statMap
 
-    val status = nullStatMap.forall {
-      case (_, count) => count == 0
-    }
-    NullStat(nullStatMap, status)
+    val validatedStatMap = nullStatMap.map(keyValue => {
+      val column = keyValue._1
+      val (nullCount, _) = keyValue._2
+      if(nullCount == 0) column -> (nullCount, true) else  keyValue
+    })
+    NullStat(validatedStatMap)
+  }
+
+  override def isSuccess: Boolean = {
+    this.statMap.forall({
+      case (_, (_, isCheckSuccess)) => isCheckSuccess
+    })
   }
 }
