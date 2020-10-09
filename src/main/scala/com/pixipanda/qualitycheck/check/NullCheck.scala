@@ -13,18 +13,31 @@ import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
 
-case class NullCheck(columns: Seq[String], override val checkType: String) extends Check(checkType) {
+case class NullCheck(columns: Seq[String], checkType: String) extends Check {
 
   override def getStat(df:DataFrame): CheckStat = {
 
     val nullStatMap = columns.map(column => {
-      (column, nullCount(df, column))
+      (column, (nullCount(df, column), false))
     }).toMap
     NullStat(nullStatMap)
   }
 
 
-  override def getStat(jdbcSource: JDBC): CheckStat = ???
+  /*
+   * This function computes row count stats for a given table.
+   * Here predicate push is used. i.e data is not loaded from table to spark. Instead query is sent to the table
+   * Loading table data to spark just to compute row count is not efficient. Instead sending query to the table is efficient
+   */
+  override def getStat(jdbcSource: JDBC): CheckStat = {
+    LOGGER.info(s"null count check on jdbc source: ${jdbcSource.sourceType}")
+    val nullStatMap = columns.map(column => {
+      val query = jdbcSource.nullCountQuery(column)
+      val count = jdbcSource.predicatePushCount(query)
+      column -> (count, false)
+    }).toMap
+    NullStat(nullStatMap)
+  }
 
 
   private def nullCount(df:DataFrame, column:String) = {

@@ -7,7 +7,7 @@ import org.slf4j.{Logger, LoggerFactory}
 
 
 
-case class DistinctStat(statMap: Map[DistinctRelation, Long], isSuccess: Boolean = false) extends  CheckStat {
+case class DistinctStat(statMap: Map[DistinctRelation, (Long, Boolean)]) extends  CheckStat {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -15,14 +15,14 @@ case class DistinctStat(statMap: Map[DistinctRelation, Long], isSuccess: Boolean
 
     LOGGER.info(s"Creating DISTINCTSTAT Report")
     val columnsStatReport = statMap.map({
-      case (distinctRelation: DistinctRelation, actual) =>
+      case (distinctRelation: DistinctRelation, (actual, isSuccess)) =>
         ColumnStatReport(
           DISTINCTSTAT,
           distinctRelation.columns.mkString(":"),
           distinctRelation.relation,
           distinctRelation.count.toString,
           actual.toString,
-          this.getValidation
+          if(isSuccess)  "success" else "failed"
         )
     }).toList
 
@@ -39,18 +39,26 @@ case class DistinctStat(statMap: Map[DistinctRelation, Long], isSuccess: Boolean
 
     val distinctStatMap = this.statMap
 
-    val status = distinctStatMap.forall{
-      case(distinctConfig, actual) =>
-        distinctConfig.relation match {
-          case "gt" => actual > distinctConfig.count
-          case "ge" => actual >= distinctConfig.count
-          case "lt" => actual < distinctConfig.count
-          case "le" => actual <= distinctConfig.count
-          case "eq" => actual == distinctConfig.count
-        }
-    }
-    DistinctStat(distinctStatMap, status)
+
+    val validatedStatMap = distinctStatMap.map(keyValue => {
+      val distinctRelation = keyValue._1
+      val (actual, _) = keyValue._2
+      distinctRelation.relation match {
+        case "gt" => if(actual > distinctRelation.count)  distinctRelation -> (actual, true) else keyValue
+        case "ge" => if(actual >= distinctRelation.count) distinctRelation -> (actual, true) else keyValue
+        case "lt" => if(actual < distinctRelation.count)  distinctRelation -> (actual, true) else keyValue
+        case "le" => if(actual <= distinctRelation.count) distinctRelation -> (actual, true) else keyValue
+        case "eq" => if(actual == distinctRelation.count) distinctRelation -> (actual, true) else keyValue
+      }
+    })
+    DistinctStat(validatedStatMap)
   }
 
+
+  override def isSuccess: Boolean = {
+    this.statMap.forall({
+      case (_, (_, isCheckSuccess)) => isCheckSuccess
+    })
+  }
 }
 

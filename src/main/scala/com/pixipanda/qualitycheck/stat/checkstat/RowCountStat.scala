@@ -7,7 +7,7 @@ import org.slf4j.{Logger, LoggerFactory}
 
 
 
-case class RowCountStat(statMap: Map[RowCountCheck, Long], isSuccess: Boolean = false) extends  CheckStat {
+case class RowCountStat(statMap: Map[RowCountCheck, (Long, Boolean)]) extends  CheckStat {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
 
@@ -16,13 +16,13 @@ case class RowCountStat(statMap: Map[RowCountCheck, Long], isSuccess: Boolean = 
     LOGGER.info(s"Creating ROWCOUNTSTAT")
 
     val rowCountStatReport = statMap.map({
-      case (rowCountCheck, actual) =>
+      case (rowCountCheck, (actual, isSuccess)) =>
         ColumnStatReport(ROWCOUNTSTAT,
           "NA",
           rowCountCheck.relation,
           rowCountCheck.count.toString,
           actual.toString,
-          this.getValidation
+          if(isSuccess)  "success" else "failed"
         )
     }).toList
     CheckStatReport(rowCountStatReport)
@@ -38,16 +38,24 @@ case class RowCountStat(statMap: Map[RowCountCheck, Long], isSuccess: Boolean = 
 
     val rowCountStatMap = this.statMap
 
-    val status = rowCountStatMap.forall{
-      case(rowCountConfig, actual) =>
-        rowCountConfig.relation match {
-          case "gt" => actual > rowCountConfig.count
-          case "ge" => actual >= rowCountConfig.count
-          case "lt" => actual < rowCountConfig.count
-          case "le" => actual <= rowCountConfig.count
-          case "eq" => actual == rowCountConfig.count
-        }
-    }
-    RowCountStat(rowCountStatMap, status)
+
+    val validatedStatMap = rowCountStatMap.map(keyValue => {
+      val rowCountConfig = keyValue._1
+      val (actual, _) = keyValue._2
+      rowCountConfig.relation match {
+        case "gt" => if(actual > rowCountConfig.count) rowCountConfig -> (actual, true) else  keyValue
+        case "ge" => if(actual >= rowCountConfig.count) rowCountConfig -> (actual, true) else  keyValue
+        case "lt" => if(actual < rowCountConfig.count) rowCountConfig -> (actual, true) else  keyValue
+        case "le" => if(actual >= rowCountConfig.count) rowCountConfig -> (actual, true) else  keyValue
+        case "eq" => if(actual == rowCountConfig.count) rowCountConfig -> (actual, true) else  keyValue
+      }
+    })
+    RowCountStat(validatedStatMap)
+  }
+
+  override def isSuccess: Boolean = {
+    this.statMap.forall({
+      case (_, (_, isCheckSuccess)) => isCheckSuccess
+    })
   }
 }

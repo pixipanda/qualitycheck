@@ -9,15 +9,15 @@ class UniqueStatSpec extends FunSpec{
 
     describe("UniqueStat Functionality") {
 
-      it("success validator") {
-        val uniqueStatMap = Map("item" -> 0L, "price" -> 0L, "quantity" -> 0L)
+      it("should validate unique stat and return success") {
+        val uniqueStatMap = Map("item" -> (0L,true), "price" -> (0L,true), "quantity" -> (0L,true))
         val uniqueStat = UniqueStat(uniqueStatMap)
         val sut = uniqueStat.validate
         assert(sut.isSuccess)
       }
 
-      it("failure validator") {
-        val uniqueStatMap = Map("item" -> 1L, "price" -> 0L, "quantity" -> 0L)
+      it("should validate unique stat and return failure") {
+        val uniqueStatMap = Map("item" -> (1L, false), "price" -> (0L,true), "quantity" -> (0L, true))
         val uniqueStat = UniqueStat(uniqueStatMap)
         val sut = uniqueStat.validate
         assert(!sut.isSuccess)

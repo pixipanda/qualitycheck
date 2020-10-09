@@ -12,9 +12,11 @@ import scala.collection.mutable.ListBuffer
 
 
 
-abstract class Check(val checkType: String) {
+abstract class Check {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
+
+  def checkType: String
 
   def getStat(df: DataFrame):CheckStat
 

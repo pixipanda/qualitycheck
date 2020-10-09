@@ -46,7 +46,7 @@ class RowCountCheckSpec extends FunSpec with TestingSparkSession{
         )
       )
 
-      it("should give rowCount count stat") {
+      it("should compute row count stat with rowCount greater than zero") {
         val itemMap = Map(
           "item"     -> List("Eggs", "Milk", "Bread", "Cheese"),
           "price"    -> List(  5.49,   3.89,    4.50,     6.00),
@@ -54,7 +54,7 @@ class RowCountCheckSpec extends FunSpec with TestingSparkSession{
         )
         val dF= mkDF(spark, itemMap.toSeq: _*)
         val rowCountCheck = RowCountCheck(0, "gt", ROWCOUNTCHECK)
-        val rowCountStatMap = Map(rowCountCheck -> 4L)
+        val rowCountStatMap = Map(rowCountCheck -> (4L,false))
         val rowCountStat = RowCountStat(rowCountStatMap)
         CheckTestHelper.testStat(config, rowCountStat, dF)
       }

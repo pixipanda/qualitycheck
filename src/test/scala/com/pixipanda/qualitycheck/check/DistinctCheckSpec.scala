@@ -49,14 +49,14 @@ class DistinctCheckSpec extends FunSpec with TestingSparkSession{
         )
       )
 
-      it("should return distinct stat") {
+      it("should do distinct check and return distinct stat") {
         val itemMap = Map(
           "item"     -> List("Eggs", "Milk", "Bread", "Cheese"),
           "price"    -> List(  5.49,   3.89,    4.50,     6.00),
           "quantity" -> List(    12,      5,       2,       10)
         )
         val dF= mkDF(spark, itemMap.toSeq: _*)
-        val distinctStatMap = Map(DistinctRelation(List("item"), 2, "ge") -> 4L)
+        val distinctStatMap = Map(DistinctRelation(List("item"), 2, "ge") -> (4L, false))
         val distinctStat = DistinctStat(distinctStatMap)
         CheckTestHelper.testStat(qualityCheckConfig, distinctStat, dF)
       }

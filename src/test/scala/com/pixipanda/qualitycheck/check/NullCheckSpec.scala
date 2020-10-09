@@ -40,26 +40,26 @@ class NullCheckSpec extends FunSpec with TestingSparkSession{
         )
       )
 
-      it("not null success") {
+      it("should should compute null stat with no nulls") {
         val itemMap = Map(
           "item"     -> List("Eggs", "Milk", "Bread", "Cheese"),
           "price"    -> List(  5.49,   3.89,    4.50,     6.00),
           "quantity" -> List(    12,      5,       2,       10)
         )
         val dF= mkDF(spark, itemMap.toSeq: _*)
-        val nullStatMap = Map("quantity" -> 0L)
+        val nullStatMap = Map("quantity" -> (0L, false))
         val nullStat = NullStat(nullStatMap)
         CheckTestHelper.testStat(config, nullStat, dF)
       }
 
-      it("null success") {
+      it("should should compute null stat with 1 null") {
         val itemMap = Map(
           "item"     -> List("Eggs", "Milk", "Bread", "Cheese"),
           "price"    -> List(  5.49,   3.89,    4.50,     6.00),
           "quantity" -> List(    12,      5,       2,       null)
         )
         val dF= mkDF(spark, itemMap.toSeq: _*)
-        val nullStatMap = Map("quantity" -> 1L)
+        val nullStatMap = Map("quantity" -> (1L, false))
         val nullStat = NullStat(nullStatMap)
         CheckTestHelper.testStat(config, nullStat, dF)
       }
