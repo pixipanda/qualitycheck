@@ -24,12 +24,12 @@ abstract class Check {
 
   def getStat(source: Source): CheckStat = {
 
-    if(source.checkOnDF) {
-      LOGGER.info("Running quality check on DataFrame")
-      getStat(source.getDF)
-    } else {
+    if(source.predicatePush) {
       LOGGER.info("Running quality check using predicate push")
       getStat(source.asInstanceOf[JDBC])
+    } else {
+      LOGGER.info("Running quality check on DataFrame")
+      getStat(source.getDF)
     }
   }
 }

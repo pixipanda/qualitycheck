@@ -22,7 +22,7 @@ abstract class Source extends  Spark {
 
   def getLabel: String
 
-  def checkOnDF: Boolean
+  def predicatePush: Boolean
 }
 
 object Source{

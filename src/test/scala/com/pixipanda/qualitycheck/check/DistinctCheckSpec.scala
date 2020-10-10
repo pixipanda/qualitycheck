@@ -33,7 +33,7 @@ class DistinctCheckSpec extends FunSpec with TestingSparkSession{
     }
 
     describe("functionality") {
-      val checkOnDF = true
+      val predicatePush = false
       val qualityCheckConfig = QualityCheckConfig(
         List(
           Hive(
@@ -41,7 +41,7 @@ class DistinctCheckSpec extends FunSpec with TestingSparkSession{
             "db1",
             "table1",
             "query1",
-            checkOnDF,
+            predicatePush,
             List(
               DistinctCheck(List(DistinctRelation(List("item"), 2, "ge")), DISTINCTCHECK)
             )

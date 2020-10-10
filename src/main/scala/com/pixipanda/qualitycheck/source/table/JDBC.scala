@@ -8,7 +8,7 @@ final case class JDBC(sourceType: String,
                       dbName: String,
                       tableName: String,
                       query: String,
-                      checkOnDF: Boolean,
+                      predicatePush: Boolean,
                       options:Map[String, String],
                       checks: Seq[Check]
                      ) extends Table(dbName, tableName, query){
