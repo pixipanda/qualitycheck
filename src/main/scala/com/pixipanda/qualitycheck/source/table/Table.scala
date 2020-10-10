@@ -1,6 +1,6 @@
 package com.pixipanda.qualitycheck.source.table
 
-import com.pixipanda.qualitycheck.check.{Check, DistinctRelation}
+import com.pixipanda.qualitycheck.check.Check
 import com.pixipanda.qualitycheck.config.Options
 import com.pixipanda.qualitycheck.constant.DataStores._
 import com.pixipanda.qualitycheck.source.Source
@@ -26,9 +26,9 @@ abstract class Table(dbName: String, tableName: String, query: String) extends S
 
   def distinctQuery(columns: Seq[String]): String = {
 
-      s"""
-        |(SELECT COUNT(DISTINCT ${columns.mkString(",")}) as count
-        | FROM $getDb.$getTable) t
+    s"""
+       |(SELECT COUNT(DISTINCT ${columns.mkString(",")}) as count
+       | FROM $getDb.$getTable) t
        """.stripMargin
 
   }
@@ -50,7 +50,8 @@ abstract class Table(dbName: String, tableName: String, query: String) extends S
 
   def uniqueCheckQuery(columns: Seq[String]):String = {
     s"""
-       |(SELECT COUNT(*) as count FROM
+       |(SELECT COUNT(*) as count
+       | FROM
        | ( SELECT ${columns.mkString(",")}, COUNT(*) as count
        |   FROM $dbName.$tableName
        |   GROUP BY ${columns.mkString(",")}
@@ -64,8 +65,6 @@ abstract class Table(dbName: String, tableName: String, query: String) extends S
 object Table {
 
   val LOGGER: Logger = LoggerFactory.getLogger(getClass.getName)
-
-  val checkONDF = true
 
   private def parserQuery(config: Config): String = {
     if(config.hasPath("query")) config.getString("query") else null
@@ -87,7 +86,11 @@ object Table {
     LOGGER.info(s"Source type is $sourceType")
 
     sourceType match {
-      case HIVE => Hive(sourceType, dbName, tableName, query, checkONDF, checks)
+
+      case HIVE =>
+        val checkONDF = true
+        Hive(sourceType, dbName, tableName, query, checkONDF, checks)
+
       case MYSQL | ORACLE | POSTGRES | TERADATA =>
         val checkONDF = false
         val optionsConfig = config.getConfig("options")
