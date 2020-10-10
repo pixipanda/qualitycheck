@@ -6,7 +6,10 @@ This project is implemented using spark, circe json, cats frameworks
 2. Supported checks: row count check, null check, unique check, distinct check. It could be extended to include other checks
 3. After the checks, it builds a dataFrame report. This dataFrame could be used to compare data correctness among multiple data sources
 4. Reports could be exported as json or csv or as a dataFrame.
-
+5. Predicate push is supported. Loading data from jdbc source to spark and then running checks may be
+   not efficient. So, checks queries are sent to the store. By default, checks will be run on the dataFrame
+   set predicatePush = "true" to enable predicate push
+   Ex: src/test/resources/qualityCheck/mysql
 ```
 
 
@@ -46,9 +49,16 @@ qualityCheck {
       }
     },
     {
-      type = "teradata"
-      dbName = "db2"
-      tableName = "table2"
+      type = "mysql"
+      dbName = "classicmodels"
+      tableName = "employees"
+      options {
+        url = "jdbc:mysql://localhost:3306/classicmodels"
+        user = "hduser"
+        password = "hadoop123"
+        driver = "com.mysql.cj.jdbc.Driver"
+      }
+      predicatePush = "true"
       checks {
         rowCountCheck {
           count = 0,
@@ -93,6 +103,19 @@ It will check if table exists. If not then throws an error and exits the program
 query = Any query that you want to run on this table. Checks will be done on the data of this query
 
 
+options {
+        url = "jdbc:mysql://localhost:3306/classicmodels"
+        user = "hduser"
+        password = "hadoop123"
+        driver = "com.mysql.cj.jdbc.Driver"
+      }
+
+Options is used to provide JDBC connection info of various JDBC sources
+
+predicatePush = "true"
+If true then check queries will be run on the source.
+If false then data will be loaded from the source to spark and the checks will be done on the dataframe. May not be efficient
+
 checks:
   rowCountCheck = { count = 0, relation = "gt" }
   It will compute the total row count for the given data. If the count does not match the relation it will throw an error and exits the program.
@@ -129,7 +152,7 @@ checks:
 Class Name
 -------------------------------
 ```scala
-com.pixipanda.qualitycheck.jobs.QualityCheck
+com.pixipanda.qualitycheck.Main
 ```
 
 
@@ -202,12 +225,4 @@ Api to get the stats
 ```txt
 Pass the typesafe parsed config object of your config file
 com.pixipanda.qualitycheck.api.StatApi.getStats(config)
-```
-
-
-Limitation
-------------------------------
-```text
-Currently, Spark fetches data from different data stores and then performs all the checks. This has a overhead of transferring data from different stores to Spark.
-In future, dynamic predicate push will be supported so that data will be transferred only if necessary otherwise stats computation will be pushed to the data store.
 ```
