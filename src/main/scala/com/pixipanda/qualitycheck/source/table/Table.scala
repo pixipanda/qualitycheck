@@ -24,7 +24,7 @@ abstract class Table(dbName: String, tableName: String, query: String) extends S
       s"$common"
   }
 
-  def distinctQuery(columns: Seq[String]): String = {
+  def distinctCheckQuery(columns: Seq[String]): String = {
 
     s"""
        |(SELECT COUNT(DISTINCT ${columns.mkString(",")}) as count
@@ -33,14 +33,14 @@ abstract class Table(dbName: String, tableName: String, query: String) extends S
 
   }
 
-  def rowCountQuery: String = {
+  def rowCountCheckQuery: String = {
     s"""
        |(SELECT COUNT(*) as count
        | FROM $getDb.$getTable) t
        | """.stripMargin
   }
 
-  def nullCountQuery(column: String): String = {
+  def nullCheckQuery(column: String): String = {
     s"""
        |(SELECT COUNT(*) as count
        | FROM $getDb.$getTable
@@ -70,6 +70,9 @@ object Table {
     if(config.hasPath("query")) config.getString("query") else null
   }
 
+  private def parsePredicatePush(config: Config) = {
+    if(config.hasPath("predicatePush")) config.getString("predicatePush").toBoolean else false
+  }
 
   def parse(config: Config): Source =  {
 
@@ -81,6 +84,7 @@ object Table {
     val tableName = config.getString("tableName")
     val query = parserQuery(config)
     val checksConfig = config.getConfig("checks")
+    val predicatePush = parsePredicatePush(config)
     val checks = Check.parse(checksConfig)
 
     LOGGER.info(s"Source type is $sourceType")
@@ -88,11 +92,12 @@ object Table {
     sourceType match {
 
       case HIVE =>
-        val predicatePush = false
         Hive(sourceType, dbName, tableName, query, predicatePush, checks)
 
       case MYSQL | ORACLE | POSTGRES | TERADATA =>
-        val predicatePush = true
+        if(!predicatePush) {
+          LOGGER.warn(s"predicatePush is false for jdbc source $sourceType. This may not be efficient. Try setting predicatePush = true")
+        }
         val optionsConfig = config.getConfig("options")
         val options = Options.parse(optionsConfig)
         JDBC(sourceType, dbName, tableName, query, predicatePush, options, checks)

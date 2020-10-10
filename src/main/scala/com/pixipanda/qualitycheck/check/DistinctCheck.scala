@@ -38,7 +38,7 @@ case class DistinctCheck(distinctCheck: Seq[DistinctRelation], checkType: String
     LOGGER.info(s"Distinct check on JDBC source: ${jdbcSource.sourceType}")
 
     val distinctStatMap = distinctCheck.map(dRelation => {
-      val query = jdbcSource.distinctQuery(dRelation.columns)
+      val query = jdbcSource.distinctCheckQuery(dRelation.columns)
       val count = jdbcSource.predicatePushCount(query)
       dRelation -> (count, false)
     }).toMap
