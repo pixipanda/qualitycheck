@@ -10,3 +10,6 @@ metastore_db
 .derby.log
 ./derby.log
 derby.log
+./app.log
+./app.json
+./qualitycheck.iml
