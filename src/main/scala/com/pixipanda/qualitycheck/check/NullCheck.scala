@@ -31,7 +31,7 @@ case class NullCheck(columns: Seq[String], checkType: String) extends Check {
   override def getStat(jdbcSource: JDBC): CheckStat = {
     LOGGER.info(s"null count check on jdbc source: ${jdbcSource.sourceType}")
     val nullStatMap = columns.map(column => {
-      val query = jdbcSource.nullCountQuery(column)
+      val query = jdbcSource.nullCheckQuery(column)
       val count = jdbcSource.predicatePushCount(query)
       column -> (count, false)
     }).toMap

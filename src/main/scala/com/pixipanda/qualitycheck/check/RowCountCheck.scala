@@ -31,7 +31,7 @@ case class RowCountCheck(count:Int, relation:String, checkType: String) extends 
    */
   override def getStat(jdbcSource: JDBC):CheckStat = {
     LOGGER.info(s"row count check on jdbc source: ${jdbcSource.sourceType}")
-    val count = jdbcSource.predicatePushCount(jdbcSource.rowCountQuery)
+    val count = jdbcSource.predicatePushCount(jdbcSource.rowCountCheckQuery)
     RowCountStat(Map(this -> (count, false)))
   }
 }
