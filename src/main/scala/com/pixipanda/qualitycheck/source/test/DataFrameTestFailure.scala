@@ -7,7 +7,7 @@ final case class DataFrameTestFailure(
   dbName: String,
   tableName: String,
   query: String,
-  checkOnDF:Boolean = true,
+  predicatePush:Boolean = false,
   options: Option[Map[String, String]],
   checks: Seq[Check]
 ) extends DataFrameTest(sourceType, dbName, tableName,query, checks) {

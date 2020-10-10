@@ -88,14 +88,14 @@ object Table {
     sourceType match {
 
       case HIVE =>
-        val checkONDF = true
-        Hive(sourceType, dbName, tableName, query, checkONDF, checks)
+        val predicatePush = false
+        Hive(sourceType, dbName, tableName, query, predicatePush, checks)
 
       case MYSQL | ORACLE | POSTGRES | TERADATA =>
-        val checkONDF = false
+        val predicatePush = true
         val optionsConfig = config.getConfig("options")
         val options = Options.parse(optionsConfig)
-        JDBC(sourceType, dbName, tableName, query, checkONDF, options, checks)
+        JDBC(sourceType, dbName, tableName, query, predicatePush, options, checks)
     }
   }
 }

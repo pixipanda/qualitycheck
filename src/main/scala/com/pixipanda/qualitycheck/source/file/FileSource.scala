@@ -9,7 +9,7 @@ import com.typesafe.config.Config
 import org.apache.spark.sql.DataFrame
 import org.slf4j.{Logger, LoggerFactory}
 
-final case class FileSource(sourceType: String, checkOnDF: Boolean, options: Map[String,String], checks: Seq[Check]) extends Source {
+final case class FileSource(sourceType: String, predicatePush: Boolean, options: Map[String,String], checks: Seq[Check]) extends Source {
 
 
   override def getDF: DataFrame = {
@@ -40,13 +40,13 @@ object  FileSource {
     LOGGER.info(s"Parsing file config")
     LOGGER.debug(s"Parsing file config: $config")
 
-    val checkOnDF = true
+    val predicatePush = false
 
     val sourceType = config.getString("type")
     val optionsConfig = config.getConfig("options")
     val options = Options.parse(optionsConfig)
     val checksConfig = config.getConfig("checks")
     val checks = Check.parse(checksConfig)
-    FileSource(sourceType, checkOnDF, options, checks)
+    FileSource(sourceType, predicatePush, options, checks)
   }
 }

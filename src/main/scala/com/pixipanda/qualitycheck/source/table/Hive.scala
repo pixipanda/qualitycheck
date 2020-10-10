@@ -12,7 +12,7 @@ final case class Hive(
                  dbName: String,
                  tableName: String,
                  query: String,
-                 checkOnDF: Boolean,
+                 predicatePush: Boolean,
                  checks: Seq[Check]) extends Table(dbName, tableName, query){
 
   override def getDF:DataFrame = {
@@ -32,7 +32,7 @@ final case class Hive(
 object Hive {
 
   def fromJson(hCursor: HCursor): Source = {
-    val checkOnDF = true
+    val predicatePush = false
     val sourceType = hCursor.downField("type").as[String].right.get
     val dbName = hCursor.downField("dbName").as[String].right.get
     val tableName = hCursor.downField("tableName").as[String].right.get
@@ -41,6 +41,6 @@ object Hive {
     // because each itemJson downField will become List[Either[DecodeFailure, Int]] so we need to use cats to traverse List[Either] to Either[List]
     // each of as[Int] returns a Result[Int] and Result[Int] has a type of Either[DecodeFailure,A] which will become List[Either]
     val checks = JsonDecoder.decodeChecks(checksJson.hcursor)
-    Hive(sourceType, dbName, tableName, query, checkOnDF, checks)
+    Hive(sourceType, dbName, tableName, query, predicatePush, checks)
   }
 }

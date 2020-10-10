@@ -5,7 +5,7 @@ import com.pixipanda.qualitycheck.constant.Checks.{DISTINCTCHECK, NULLCHECK, ROW
 import com.pixipanda.qualitycheck.source.test.{DataFrameTestFailure, DataFrameTestSuccess}
 
 object TestConfig {
-  val checkOnDF = true
+  val predicatePush = false
   val successConfig = QualityCheckConfig(
     List(
       DataFrameTestSuccess(
@@ -13,7 +13,7 @@ object TestConfig {
         "testDb",
         "testTable",
         null,
-        checkOnDF,
+        predicatePush,
         None,
         List(
           RowCountCheck(0, "gt", ROWCOUNTCHECK),
@@ -33,7 +33,7 @@ object TestConfig {
         "testDb",
         "testTable",
         "testquery",
-        checkOnDF,
+        predicatePush,
         None,
         List(
           RowCountCheck(0, "gt", ROWCOUNTCHECK),
