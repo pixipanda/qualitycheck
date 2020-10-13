@@ -10,7 +10,7 @@
     <scala.version>2.11.8</scala.version>
     <spark.version>2.3.0</spark.version>
     <hive.version>1.2.1.2.3.4.0-3485</hive.version>
-    <junit.version>4.12</junit.version>
+    <junit.version>4.13.1</junit.version>
     <circeVersion>0.10.0</circeVersion>
     <scala.test.version>3.0.5</scala.test.version>
   </properties>
